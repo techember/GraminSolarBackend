@@ -18,11 +18,11 @@ app.use(cookieParser());
 app.use(
   cors({
     origin: [
-      "http://localhost:5173", // local dev frontend
-      "https://gramin-solar-frontend.vercel.app", // production frontend
+      config.localDevOrigin, // local dev frontend
+      config.ProdDevOrigin, // production frontend
     ],
     credentials: true,
-  }),
+  })
 );
 
 app.use(express.json());

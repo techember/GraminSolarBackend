@@ -6,10 +6,10 @@ import { User } from "../modals/User";
 import { signupSchema, loginSchema } from "../schemas/authSchemas";
 
 export const signup = async (req: Request, res: Response): Promise<any> => {
+  console.log(req.body);
   try {
-    const { fullname,phoneNo , address, email, password } = await signupSchema.parseAsync(
-      req.body,
-    );
+    const { fullname, phoneNo, address, email, password } =
+      await signupSchema.parseAsync(req.body);
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -40,6 +40,7 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
     });
   } catch (error) {
     if (error instanceof Error && "issues" in error) {
+      console.log(error);
       return res
         .status(400)
         .json({ message: "Validation failed", errors: error });

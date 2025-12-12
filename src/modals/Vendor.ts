@@ -12,12 +12,10 @@ const vendorSchema = new mongoose.Schema({
   aadhaarNo: {
     type: String,
     required: true,
-    unique: true,
   },
   panCard: {
     type: String,
     required: true,
-    unique: true,
   },
   email: {
     type: String,
@@ -25,6 +23,10 @@ const vendorSchema = new mongoose.Schema({
     unique: true,
   },
   password: {
+    type: String,
+    required: true,
+  },
+  phoneNo: {
     type: String,
     required: true,
   },

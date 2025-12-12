@@ -8,7 +8,8 @@ import { Vendor } from "../modals/Vendor";
 export const signup = async (req: Request, res: Response): Promise<any> => {
   try {
     // ⬇️ Updated fields added here
-    const { fullName, address, aadhaarNo, panCard, email, password } =
+    console.log(req.body);
+    const { fullName, address, aadhaarNo, panCard, email, password, phoneNo } =
       await signupSchema.parseAsync(req.body);
 
     // Check duplicate email
@@ -36,6 +37,7 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
     const newVendor = new Vendor({
       fullName,
       address,
+      phoneNo,
       aadhaarNo,
       panCard,
       email,
@@ -54,6 +56,7 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
     });
   } catch (error) {
     if (error instanceof Error && "issues" in error) {
+      console.log(error);
       return res
         .status(400)
         .json({ message: "Validation failed", errors: error });

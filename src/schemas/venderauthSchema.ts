@@ -7,6 +7,7 @@ export const signupSchema = z.object({
   panCard: z.string().min(10),
   email: z.string().email(),
   password: z.string().min(6),
+  phoneNo: z.string().min(10).max(10),
 });
 
 export const loginSchema = z.object({
