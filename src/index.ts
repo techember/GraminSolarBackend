@@ -4,6 +4,8 @@ import config from "./config";
 import cookieParser from "cookie-parser";
 import userRouter from "./routes/userRoutes";
 import cors from "cors";
+import adminRouter from "./routes/adminRoutes";
+import vendorRouter from "./routes/vendorRouter";
 
 mongoose
   .connect(config.MONGO_URL)
@@ -17,7 +19,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173", // local dev frontend
-      "", // production frontend
+      "https://gramin-solar-frontend.vercel.app", // production frontend
     ],
     credentials: true,
   }),
@@ -26,7 +28,9 @@ app.use(
 app.use(express.json());
 
 // Routes
-app.use("/api/auth", userRouter);
+app.use("/api/userAuth", userRouter);
+app.use("/api/adminAuth", adminRouter);
+app.use("/api/venderAuth", vendorRouter);
 
 // Start server
 app.listen(config.port, () => {
