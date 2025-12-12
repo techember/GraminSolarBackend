@@ -19,7 +19,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173", // local dev frontend
-      "", // production frontend
+      "https://gramin-solar-frontend.vercel.app", // production frontend
     ],
     credentials: true,
   }),
@@ -28,9 +28,9 @@ app.use(
 app.use(express.json());
 
 // Routes
-app.use("/api/auth", userRouter);
-app.use("/api/auth", adminRouter);
-app.use("/api/auth", vendorRouter);
+app.use("/api/userAuth", userRouter);
+app.use("/api/adminAuth", adminRouter);
+app.use("/api/venderAuth", vendorRouter);
 
 // Start server
 app.listen(config.port, () => {
