@@ -2,24 +2,42 @@ import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import config from "../config";
-import { signupSchema, loginSchema } from "../schemas/authSchemas";
+import { signupSchema, loginSchema } from "../schemas/venderauthSchema";
 import { Vendor } from "../modals/Vendor";
 
 export const signup = async (req: Request, res: Response): Promise<any> => {
   try {
-    const { username, email, password } = await signupSchema.parseAsync(
-      req.body,
-    );
+    // ⬇️ Updated fields added here
+    const { fullName, address, aadhaarNo, panCard, email, password } =
+      await signupSchema.parseAsync(req.body);
 
-    const existingUser = await Vendor.findOne({ email });
-    if (existingUser) {
+    // Check duplicate email
+    const existingEmail = await Vendor.findOne({ email });
+    if (existingEmail) {
       return res.status(400).json({ message: "Email already exists" });
     }
 
+    // Check duplicate Aadhaar
+    const existingAadhaar = await Vendor.findOne({ aadhaarNo });
+    if (existingAadhaar) {
+      return res.status(400).json({ message: "Aadhaar already exists" });
+    }
+
+    // Check duplicate PAN
+    const existingPan = await Vendor.findOne({ panCard });
+    if (existingPan) {
+      return res.status(400).json({ message: "PAN already exists" });
+    }
+
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // ⬇️ Updated user creation
     const newVendor = new Vendor({
-      username,
+      fullName,
+      address,
+      aadhaarNo,
+      panCard,
       email,
       password: hashedPassword,
     });
@@ -30,7 +48,7 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
       message: "User created successfully",
       user: {
         id: newVendor._id,
-        username: newVendor.username,
+        fullName: newVendor.fullName, // ⬅️ Updated
         email: newVendor.email,
       },
     });
@@ -57,31 +75,29 @@ export const login = async (req: Request, res: Response): Promise<any> => {
     if (!isPasswordValid)
       return res.status(400).json({ message: "Invalid credentials" });
 
+    // Generate token
     const jwtToken = jwt.sign({ id: user._id }, config.JWT_PASSWORD, {
       expiresIn: "7d",
     });
 
     res.cookie("token", jwtToken, {
       httpOnly: true,
-      secure: true, // Always true for HTTPS (Vercel)
-      sameSite: "none", // Required for cross-domain cookies
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      secure: true,
+      sameSite: "none",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    //Return token and user data
     return res.json({
       message: "Login successful",
       token: jwtToken,
       user: {
         id: user._id,
-        username: user.username,
+        fullName: user.fullName, // ⬅️ Updated
         email: user.email,
       },
     });
   } catch (error) {
-    // Better error handling for Zod validation
     if (error instanceof Error && "issues" in error) {
-      console.error("Validation error:", error);
       return res.status(400).json({
         message: "Validation failed",
         errors: (error as any).issues,
