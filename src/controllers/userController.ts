@@ -7,7 +7,7 @@ import { signupSchema, loginSchema } from "../schemas/authSchemas";
 
 export const signup = async (req: Request, res: Response): Promise<any> => {
   try {
-    const { username, email, password } = await signupSchema.parseAsync(
+    const { fullname,phoneNo , address, email, password } = await signupSchema.parseAsync(
       req.body,
     );
 
@@ -19,7 +19,9 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = new User({
-      username,
+      fullname,
+      phoneNo,
+      address,
       email,
       password: hashedPassword,
     });
@@ -30,7 +32,9 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
       message: "User created successfully",
       user: {
         id: newUser._id,
-        username: newUser.username,
+        fullname: newUser.fullname,
+        address: newUser.address,
+        phoneNo: newUser.phoneNo,
         email: newUser.email,
       },
     });
@@ -74,7 +78,7 @@ export const login = async (req: Request, res: Response): Promise<any> => {
       token: jwtToken,
       user: {
         id: user._id,
-        username: user.username,
+        fullname: user.fullname,
         email: user.email,
       },
     });
