@@ -6,6 +6,7 @@ import userRouter from "./routes/userRoutes";
 import cors from "cors";
 import adminRouter from "./routes/adminRoutes";
 import vendorRouter from "./routes/vendorRouter";
+import orderRouter from "./routes/orderRoutes";
 
 mongoose
   .connect(config.MONGO_URL)
@@ -31,6 +32,8 @@ app.use(express.json());
 app.use("/api/userAuth", userRouter);
 app.use("/api/adminAuth", adminRouter);
 app.use("/api/venderAuth", vendorRouter);
+app.use("/api/orders", orderRouter);
+
 
 // Start server
 app.listen(config.port, () => {

@@ -1,41 +1,31 @@
 import { Request, Response, NextFunction } from "express";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import config from "../config";
-interface DecodedToken extends JwtPayload {
+
+interface JwtPayload {
   id: string;
 }
 
-export const userMiddleware = (
+export const protect = (
   req: Request,
   res: Response,
   next: NextFunction,
-): void => {
+): any => {
   try {
-    // Look specifically for YOUR token cookie (not authjs)
-    const token = req.cookies.token || req.cookies["authjs.session-token"];
+    const authHeader = req.headers.authorization;
 
-    if (!token) {
-      console.log('No "token" cookie found');
-      res.status(401).json({
-        message:
-          "Authentication failed. Please log in with the custom login system.",
-        debug: {
-          cookiesReceived: Object.keys(req.cookies),
-          expectedCookie: "token",
-        },
-      });
-      return;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "Not authorized" });
     }
 
-    const decoded = jwt.verify(token, config.JWT_PASSWORD) as DecodedToken;
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, config.JWT_PASSWORD) as JwtPayload;
 
-    req.user = { id: decoded.id };
+    // attach user id to request
+    (req as any).userId = decoded.id;
+
     next();
   } catch (error) {
-    console.log("JWT verification failed:", error);
-    res.status(401).json({
-      message: "Invalid or expired token. Please log in again.",
-      error: error instanceof Error ? error.message : error,
-    });
+    return res.status(401).json({ message: "Invalid token" });
   }
 };
