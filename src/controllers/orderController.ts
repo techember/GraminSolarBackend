@@ -32,15 +32,11 @@ export const placeOrder = async (req: Request, res: Response): Promise<any> => {
       order,
     });
   } catch (error) {
-<<<<<<< HEAD
     console.log(error);
-    return res.status(500).json({ message: "Server error", error });
-=======
     return res.status(500).json({
       message: "Server error",
       error,
     });
->>>>>>> 31e0151 (location crap added)
   }
 };
 
@@ -62,14 +58,10 @@ export const getAllOrders = async (
       orders,
     });
   } catch (error) {
-<<<<<<< HEAD
     console.log(error);
-    return res.status(500).json({ message: "Server error", error });
-=======
     return res.status(500).json({
       message: "Server error",
       error,
     });
->>>>>>> 31e0151 (location crap added)
   }
 };
