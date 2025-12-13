@@ -19,8 +19,11 @@ app.use(cookieParser());
 // CORS setup for localhost:5173
 app.use(
   cors({
-    origin: "http://localhost:5173", // React dev server
-    credentials: true, // allow cookies to be sent
+    origin: [
+      "http://localhost:5173",
+      "https://www.deekshagraminsolar.online",
+    ],
+    credentials: true,
   })
 );
 
