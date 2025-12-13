@@ -4,27 +4,20 @@ const OrderSchema = new Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", 
+      ref: "User",
       required: true,
     },
 
     plan: {
-      power: {
-        type: Number,
-        required: true,
-      },
-      price: {
-        type: Number,
-        required: true,
-      },
-      downpayment: {
-        type: Number,
-        required: true,
-      },
-      subsidy: {
-        type: Number,
-        required: true,
-      },
+      power: { type: Number, required: true },
+      price: { type: Number, required: true },
+      downpayment: { type: Number, required: true },
+      subsidy: { type: Number, required: true },
+    },
+
+    location: {
+      latitude: { type: Number },
+      longitude: { type: Number },
     },
   },
   { timestamps: true },
