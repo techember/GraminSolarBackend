@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { Order } from "../modals/Order";
 
 export const placeOrder = async (req: Request, res: Response): Promise<any> => {
+  console.log(req.body);
   try {
     const userId = (req as any).userId;
 
@@ -34,8 +35,9 @@ export const placeOrder = async (req: Request, res: Response): Promise<any> => {
 export const getAllOrders = async (
   req: Request,
   res: Response,
-): Promise<any> => {
-  try {
+): Promise<any> => {console.log(req.body);
+  try {  
+
     const orders = await Order.find()
       .populate("user", "fullName email") // adjust fields
       .sort({ createdAt: -1 });
