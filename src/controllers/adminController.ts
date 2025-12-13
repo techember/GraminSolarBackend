@@ -120,7 +120,8 @@ export const getAllUsers = async (req: Request, res: Response) => {
 
 export const getAllVendors = async (req: Request, res: Response) => {
   try {
-    const vendors = await Vendor.find().select("-password"); // hide password
+    const vendors = await Vendor.find().select("-password");
+    console.log(vendors); // hide password
     res.status(200).json({
       message: "All vendors fetched successfully",
       vendors,

@@ -25,6 +25,7 @@ const OrderSchema = new Schema(
         type: Number,
         required: true,
       },
+    },
 
     location: {
       latitude: { type: Number },
