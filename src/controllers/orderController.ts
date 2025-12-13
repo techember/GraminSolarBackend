@@ -12,19 +12,6 @@ export const placeOrder = async (req: Request, res: Response): Promise<any> => {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    // Optional: Validate latitude and longitude if provided
-    if (latitude !== undefined && (latitude < -90 || latitude > 90)) {
-      return res
-        .status(400)
-        .json({ message: "Invalid latitude. Must be between -90 and 90" });
-    }
-
-    if (longitude !== undefined && (longitude < -180 || longitude > 180)) {
-      return res
-        .status(400)
-        .json({ message: "Invalid longitude. Must be between -180 and 180" });
-    }
-
     const order = await Order.create({
       user: userId,
       plan: {
@@ -54,8 +41,7 @@ export const getAllOrders = async (
 ): Promise<any> => {
   try {
     const orders = await Order.find()
-      .populate("user", "fullName email")
-      .select("+location")
+      .populate("user", "-password") 
       .sort({ createdAt: -1 });
 
     return res.status(200).json({
