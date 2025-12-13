@@ -21,8 +21,18 @@ export const protect = (
     const token = authHeader.split(" ")[1];
     const decoded = jwt.verify(token, config.JWT_PASSWORD) as JwtPayload;
 
-    // attach user id to request
+    // ✅ Attach userId (unchanged approach)
     (req as any).userId = decoded.id;
+
+    // ✅ OPTIONAL: Attach location if provided
+    const { latitude, longitude } = req.body || {};
+
+    if (latitude !== undefined && longitude !== undefined) {
+      (req as any).location = {
+        latitude: Number(latitude),
+        longitude: Number(longitude),
+      };
+    }
 
     next();
   } catch (error) {

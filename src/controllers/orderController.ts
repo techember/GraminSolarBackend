@@ -1,10 +1,13 @@
 import { Request, Response } from "express";
 import { Order } from "../modals/Order";
 
+/**
+ * PLACE ORDER
+ */
 export const placeOrder = async (req: Request, res: Response): Promise<any> => {
-  console.log(req.body);
   try {
     const userId = (req as any).userId;
+    const location = (req as any).location;
 
     const { power, price, downpayment, subsidy } = req.body;
 
@@ -20,6 +23,7 @@ export const placeOrder = async (req: Request, res: Response): Promise<any> => {
         downpayment,
         subsidy,
       },
+      location: location || undefined,
     });
 
     return res.status(201).json({
@@ -28,18 +32,23 @@ export const placeOrder = async (req: Request, res: Response): Promise<any> => {
     });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ message: "Server error", error });
+    return res.status(500).json({
+      message: "Server error",
+      error,
+    });
   }
 };
 
+/**
+ * GET ALL ORDERS
+ */
 export const getAllOrders = async (
   req: Request,
   res: Response,
-): Promise<any> => {console.log(req.body);
-  try {  
-
+): Promise<any> => {
+  try {
     const orders = await Order.find()
-      .populate("user", "fullName email") // adjust fields
+      .populate("user", "fullName email")
       .sort({ createdAt: -1 });
 
     return res.status(200).json({
@@ -48,6 +57,9 @@ export const getAllOrders = async (
     });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ message: "Server error", error });
+    return res.status(500).json({
+      message: "Server error",
+      error,
+    });
   }
 };

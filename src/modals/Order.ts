@@ -4,7 +4,7 @@ const OrderSchema = new Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", 
+      ref: "User",
       required: true,
     },
 
@@ -25,6 +25,11 @@ const OrderSchema = new Schema(
         type: Number,
         required: true,
       },
+
+    location: {
+      latitude: { type: Number },
+      longitude: { type: Number },
+
     },
   },
   { timestamps: true },
