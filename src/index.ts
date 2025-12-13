@@ -16,13 +16,11 @@ mongoose
 const app = express();
 app.use(cookieParser());
 
+// CORS setup for localhost:5173
 app.use(
   cors({
-    origin: [
-      config.localDevOrigin, // local dev frontend
-      config.ProdDevOrigin, // production frontend
-    ],
-    credentials: true,
+    origin: "http://localhost:5173", // React dev server
+    credentials: true, // allow cookies to be sent
   })
 );
 
@@ -33,7 +31,6 @@ app.use("/api/userAuth", userRouter);
 app.use("/api/adminAuth", adminRouter);
 app.use("/api/venderAuth", vendorRouter);
 app.use("/api/orders", orderRouter);
-
 
 // Start server
 app.listen(config.port, () => {

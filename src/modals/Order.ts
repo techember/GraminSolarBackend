@@ -10,7 +10,7 @@ const OrderSchema = new Schema(
 
     plan: {
       power: {
-        type: Number,
+        type: String,
         required: true,
       },
       price: {
