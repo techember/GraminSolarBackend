@@ -4,11 +4,13 @@ import jwt from "jsonwebtoken";
 import config from "../config";
 import { signupSchema, loginSchema } from "../schemas/authSchemas";
 import { Admin } from "../modals/Admin";
+import { User } from "../modals/User";
+import { Vendor } from "../modals/Vendor";
 
 export const signup = async (req: Request, res: Response): Promise<any> => {
   try {
     const { fullname, email, password } = await signupSchema.parseAsync(
-      req.body,
+      req.body
     );
 
     const existingUser = await Admin.findOne({ email });
@@ -101,4 +103,30 @@ export const logout = async (req: Request, res: Response): Promise<any> => {
   });
 
   return res.status(200).json({ message: "Logged out successfully" });
+};
+
+export const getAllUsers = async (req: Request, res: Response) => {
+  try {
+    const users = await User.find().select("-password"); // hide password
+    res.status(200).json({
+      message: "All users fetched successfully",
+      users,
+    });
+  } catch (error) {
+    console.error("Get users error:", error);
+    res.status(500).json({ message: "Failed to fetch users" });
+  }
+};
+
+export const getAllVendors = async (req: Request, res: Response) => {
+  try {
+    const vendors = await Vendor.find().select("-password"); // hide password
+    res.status(200).json({
+      message: "All vendors fetched successfully",
+      vendors,
+    });
+  } catch (error) {
+    console.error("Get vendors error:", error);
+    res.status(500).json({ message: "Failed to fetch vendors" });
+  }
 };
