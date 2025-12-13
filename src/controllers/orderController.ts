@@ -5,7 +5,6 @@ import { Order } from "../modals/Order";
  * PLACE ORDER
  */
 export const placeOrder = async (req: Request, res: Response): Promise<any> => {
-  console.log(req.body);
   try {
     const userId = (req as any).userId;
     const location = (req as any).location;
@@ -46,9 +45,8 @@ export const placeOrder = async (req: Request, res: Response): Promise<any> => {
 export const getAllOrders = async (
   req: Request,
   res: Response,
-): Promise<any> => {console.log(req.body);
-  try {  
-
+): Promise<any> => {
+  try {
     const orders = await Order.find()
       .populate("user", "fullName email")
       .sort({ createdAt: -1 });
