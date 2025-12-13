@@ -1,15 +1,12 @@
 import { Request, Response } from "express";
 import { Order } from "../modals/Order";
 
-/**
- * PLACE ORDER
- */
 export const placeOrder = async (req: Request, res: Response): Promise<any> => {
   try {
     const userId = (req as any).userId;
-    const location = (req as any).location;
 
-    const { power, price, downpayment, subsidy } = req.body;
+    const { power, price, downpayment, subsidy, latitude, longitude } =
+      req.body;
 
     if (!power || !price || !downpayment || !subsidy) {
       return res.status(400).json({ message: "All fields are required" });
@@ -23,7 +20,10 @@ export const placeOrder = async (req: Request, res: Response): Promise<any> => {
         downpayment,
         subsidy,
       },
-      location: location || undefined,
+      location: {
+        latitude,
+        longitude,
+      },
     });
 
     return res.status(201).json({
@@ -31,24 +31,17 @@ export const placeOrder = async (req: Request, res: Response): Promise<any> => {
       order,
     });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      message: "Server error",
-      error,
-    });
+    return res.status(500).json({ message: "Server error", error });
   }
 };
 
-/**
- * GET ALL ORDERS
- */
 export const getAllOrders = async (
   req: Request,
   res: Response,
 ): Promise<any> => {
   try {
     const orders = await Order.find()
-      .populate("user", "fullName email")
+      .populate("user", "-password") 
       .sort({ createdAt: -1 });
 
     return res.status(200).json({
@@ -56,10 +49,6 @@ export const getAllOrders = async (
       orders,
     });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      message: "Server error",
-      error,
-    });
+    return res.status(500).json({ message: "Server error", error });
   }
 };
