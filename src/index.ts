@@ -22,6 +22,7 @@ app.use(
     origin: [
       "http://localhost:5173",
       "https://www.deekshagraminsolar.online",
+      "http://localhost:3000",
     ],
     credentials: true,
   })

@@ -9,7 +9,7 @@ import { Vendor } from "../modals/Vendor";
 
 export const signup = async (req: Request, res: Response): Promise<any> => {
   try {
-    const { fullname, email, password } = await signupSchema.parseAsync(
+    const { fullname, email, password, address, phoneNo } = await signupSchema.parseAsync(
       req.body
     );
 
@@ -21,9 +21,11 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newAdmin = new Admin({
-      fullname,
+      username: fullname,
       email,
       password: hashedPassword,
+      address,
+      phoneNo,
     });
 
     await newAdmin.save();
