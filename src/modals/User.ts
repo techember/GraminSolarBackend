@@ -5,14 +5,29 @@ const userSchema = new mongoose.Schema(
   {
     fullname: { type: String, required: true },
     address: { type: String, required: true },
-    vendorId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Vendor",
-      required: true,
-    },
+    gmail: { type: String },
     phoneNo: { type: Number, required: true },
+    consumerNumber: { type: Number, required: true },
     email: { type: String, required: true, unique: true },
+    aadhaarNo: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    panCard: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     password: { type: String, required: true },
+    aadhaarDocument: {
+      url: { type: String, required: true },
+      publicId: { type: String, required: true },
+    },
+    panCardDocument: {
+      url: { type: String, required: true },
+      publicId: { type: String, required: true },
+    },
   },
   { timestamps: true },
 );

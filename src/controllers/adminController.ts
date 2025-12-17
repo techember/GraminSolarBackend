@@ -7,48 +7,48 @@ import { Admin } from "../modals/Admin";
 import { User } from "../modals/User";
 import { Vendor } from "../modals/Vendor";
 
-export const signup = async (req: Request, res: Response): Promise<any> => {
-  try {
-    const { fullname, email, password, address, phoneNo } = await signupSchema.parseAsync(
-      req.body
-    );
+// export const signup = async (req: Request, res: Response): Promise<any> => {
+//   try {
+//     const { fullname, email, password, address, phoneNo } = await signupSchema.parseAsync(
+//       req.body
+//     );
 
-    const existingUser = await Admin.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: "Email already exists" });
-    }
+//     const existingUser = await Admin.findOne({ email });
+//     if (existingUser) {
+//       return res.status(400).json({ message: "Email already exists" });
+//     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+//     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newAdmin = new Admin({
-      username: fullname,
-      email,
-      password: hashedPassword,
-      address,
-      phoneNo,
-    });
+//     const newAdmin = new Admin({
+//       username: fullname,
+//       email,
+//       password: hashedPassword,
+//       address,
+//       phoneNo,
+//     });
 
-    await newAdmin.save();
+//     await newAdmin.save();
 
-    return res.status(201).json({
-      message: "User created successfully",
-      user: {
-        id: newAdmin._id,
-        username: newAdmin.username,
-        email: newAdmin.email,
-      },
-    });
-  } catch (error) {
-    if (error instanceof Error && "issues" in error) {
-      return res
-        .status(400)
-        .json({ message: "Validation failed", errors: error });
-    }
+//     return res.status(201).json({
+//       message: "User created successfully",
+//       user: {
+//         id: newAdmin._id,
+//         username: newAdmin.username,
+//         email: newAdmin.email,
+//       },
+//     });
+//   } catch (error) {
+//     if (error instanceof Error && "issues" in error) {
+//       return res
+//         .status(400)
+//         .json({ message: "Validation failed", errors: error });
+//     }
 
-    console.error("Signup error:", error);
-    return res.status(500).json({ message: "Error signing up" });
-  }
-};
+//     console.error("Signup error:", error);
+//     return res.status(500).json({ message: "Error signing up" });
+//   }
+// };
 
 export const login = async (req: Request, res: Response): Promise<any> => {
   try {

@@ -3,8 +3,11 @@ import { z } from "zod";
 
 export const signupSchema = z.object({
   fullname: z.string(),
-  vendorId:z.string(),
+  gmail: z.string().email(),
   address: z.string(),
+  consumerNumber:z.string(),
+  panCard: z.string(),
+  aadhaarNo: z.string(),
   phoneNo: z.string().max(10).min(10),
   email: z.string().email(),
   password: z
