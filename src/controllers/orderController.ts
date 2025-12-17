@@ -4,6 +4,7 @@ import Order from "../modals/Order";
 export const createOrder = async (req: Request, res: Response) => {
   console.log("Create Order called with body:", req.body);
   try {
+    const userId = (req as any).userId;
     const { power, price, registrationFee, subsidy, location } = req.body;
 
     if (!req.file) {
@@ -38,6 +39,7 @@ export const createOrder = async (req: Request, res: Response) => {
     }
 
     const order = await Order.create({
+      user: userId,
       power,
       price: Number(price),
       registrationFee: Number(registrationFee),
