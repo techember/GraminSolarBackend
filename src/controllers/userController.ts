@@ -8,7 +8,7 @@ import { signupSchema, loginSchema } from "../schemas/authSchemas";
 export const signup = async (req: Request, res: Response): Promise<any> => {
   console.log(req.body);
   try {
-    const { fullname, phoneNo, address, email, password } =
+    const { fullname, vendorId, phoneNo, address, email, password } =
       await signupSchema.parseAsync(req.body);
 
     const existingUser = await User.findOne({ email });
@@ -19,6 +19,7 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = new User({
+      vendorId,
       fullname,
       phoneNo,
       address,
@@ -33,6 +34,7 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
       user: {
         id: newUser._id,
         fullname: newUser.fullname,
+        vendorId:newUser.vendorId,
         address: newUser.address,
         phoneNo: newUser.phoneNo,
         email: newUser.email,

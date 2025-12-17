@@ -133,3 +133,22 @@ export const getAllVendors = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Failed to fetch vendors" });
   }
 };
+
+export const getUsersByVendor = async (req: Request, res: Response) => {
+  try {
+    const { vendorId } = req.params;
+
+    const users = await User.find({ vendorId })
+      .select("-password")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      message: "Users under vendor fetched successfully",
+      totalUsers: users.length,
+      users,
+    });
+  } catch (error) {
+    console.error("Get users by vendor error:", error);
+    res.status(500).json({ message: "Failed to fetch vendor users" });
+  }
+};
