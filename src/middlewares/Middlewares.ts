@@ -9,7 +9,7 @@ interface JwtPayload {
 export const protect = (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ): any => {
   try {
     const authHeader = req.headers.authorization;
@@ -19,23 +19,14 @@ export const protect = (
     }
 
     const token = authHeader.split(" ")[1];
+
     const decoded = jwt.verify(token, config.JWT_PASSWORD) as JwtPayload;
 
-    // ✅ Attach userId (unchanged approach)
+    // ✅ Attach ONLY userId
     (req as any).userId = decoded.id;
-
-    // ✅ OPTIONAL: Attach location if provided
-    const { latitude, longitude } = req.body || {};
-
-    if (latitude !== undefined && longitude !== undefined) {
-      (req as any).location = {
-        latitude: Number(latitude),
-        longitude: Number(longitude),
-      };
-    }
 
     next();
   } catch (error) {
-    return res.status(401).json({ message: "Invalid token" });
+    return res.status(401).json({ message: "Invalid or expired token" });
   }
 };

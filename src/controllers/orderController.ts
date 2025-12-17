@@ -1,47 +1,74 @@
 import { Request, Response } from "express";
-import { Order } from "../modals/Order";
+import Order from "../modals/Order";
 
-export const placeOrder = async (req: Request, res: Response): Promise<any> => {
+export const createOrder = async (req: Request, res: Response) => {
+  console.log("Create Order called with body:", req.body);
   try {
-    const userId = (req as any).userId;
+    const { power, price, registrationFee, subsidy, location } = req.body;
 
-    const { power, price, downpayment, subsidy, latitude, longitude } =
-      req.body;
+    if (!req.file) {
+      return res.status(400).json({
+        message: "Payment screenshot is required",
+      });
+    }
 
-    if (!power || !price || !downpayment || !subsidy) {
-      return res.status(400).json({ message: "All fields are required" });
+    // ✅ PARSE LOCATION
+    let parsedLocation;
+    try {
+      parsedLocation =
+        typeof location === "string" ? JSON.parse(location) : location;
+    } catch {
+      return res.status(400).json({
+        message: "Invalid location data",
+      });
+    }
+
+    // ✅ VALIDATION
+    if (
+      !power ||
+      !price ||
+      !registrationFee ||
+      !subsidy ||
+      !parsedLocation?.latitude ||
+      !parsedLocation?.longitude
+    ) {
+      return res.status(400).json({
+        message: "All fields are required",
+      });
     }
 
     const order = await Order.create({
-      user: userId,
-      plan: {
-        power,
-        price,
-        downpayment,
-        subsidy,
-      },
+      power,
+      price: Number(price),
+      registrationFee: Number(registrationFee),
+      subsidy: Number(subsidy),
       location: {
-        latitude,
-        longitude,
+        latitude: Number(parsedLocation.latitude),
+        longitude: Number(parsedLocation.longitude),
       },
+      paymentProof: req.file.path,
+      // isReferred → default false
     });
 
-    return res.status(201).json({
+    res.status(201).json({
       message: "Order placed successfully",
       order,
     });
-  } catch (error) {
-    return res.status(500).json({ message: "Server error", error });
+  } catch (err) {
+    console.error("Order creation error:", err);
+    res.status(500).json({
+      message: "Internal server error",
+    });
   }
 };
 
 export const getAllOrders = async (
   req: Request,
-  res: Response,
+  res: Response
 ): Promise<any> => {
   try {
     const orders = await Order.find()
-      .populate("user", "-password") 
+      .populate("user", "-password")
       .sort({ createdAt: -1 });
 
     return res.status(200).json({

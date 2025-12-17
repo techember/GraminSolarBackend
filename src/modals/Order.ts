@@ -1,39 +1,55 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose from "mongoose";
 
-const OrderSchema = new Schema(
+const orderSchema = new mongoose.Schema(
   {
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+    power: {
+      type: String,
       required: true,
     },
 
-    plan: {
-      power: {
-        type: String,
-        required: true,
-      },
-      price: {
-        type: Number,
-        required: true,
-      },
-      downpayment: {
-        type: Number,
-        required: true,
-      },
-      subsidy: {
-        type: Number,
-        required: true,
-      },
+    price: {
+      type: Number,
+      required: true,
+    },
+
+    registrationFee: {
+      type: Number,
+      required: true,
+    },
+
+    subsidy: {
+      type: Number,
+      required: true,
+    },
+
+    isReferred: {
+      type: Boolean,
+      default: false, // ✅ FIX
     },
 
     location: {
-      latitude: { type: Number },
-      longitude: { type: Number },
+      latitude: {
+        type: Number,
+        required: true,
+      },
+      longitude: {
+        type: Number,
+        required: true,
+      },
+    },
 
+    paymentProof: {
+      type: String, // S3 / Cloudinary / local path
+      required: true,
+    },
+
+    status: {
+      type: String,
+      enum: ["pending", "verified", "rejected"],
+      default: "pending",
     },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
-export const Order = mongoose.model("Order", OrderSchema);
+export default mongoose.model("Order", orderSchema);
