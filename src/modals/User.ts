@@ -32,4 +32,11 @@ const userSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+const contactSchema = new mongoose.Schema({
+  name: { type: String },
+  email: { type: String },
+  message: { type: String },
+});
+
 export const User = mongoose.model("User", userSchema);
+export const Contact = mongoose.model("Contact", contactSchema);

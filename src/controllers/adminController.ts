@@ -6,6 +6,7 @@ import { signupSchema, loginSchema } from "../schemas/authSchemas";
 import { Admin } from "../modals/Admin";
 import { User } from "../modals/User";
 import { Vendor } from "../modals/Vendor";
+import Order from "../modals/Order";
 
 // export const signup = async (req: Request, res: Response): Promise<any> => {
 //   try {
@@ -150,5 +151,53 @@ export const getUsersByVendor = async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Get users by vendor error:", error);
     res.status(500).json({ message: "Failed to fetch vendor users" });
+  }
+};
+
+export const updateOrderStatus = async (
+  req: Request,
+  res: Response,
+): Promise<any> => {
+  try {
+    const { orderId } = req.params;
+    const { status } = req.body;
+
+    // ✅ VALID STATUS CHECK (MATCHES SCHEMA)
+    const allowedStatuses = ["pending", "verified", "rejected"];
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        message: "Invalid status. Allowed values: pending, verified, rejected",
+      });
+    }
+
+    // ✅ FIND ORDER
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({
+        message: "Order not found",
+      });
+    }
+
+    // ✅ OPTIONAL: Prevent re-verifying rejected orders
+    if (order.status === "verified") {
+      return res.status(400).json({
+        message: "Verified orders cannot be modified",
+      });
+    }
+
+    // ✅ UPDATE STATUS
+    order.status = status;
+    await order.save();
+
+    return res.status(200).json({
+      message: "Order status updated successfully",
+      orderId: order._id,
+      status: order.status,
+    });
+  } catch (error) {
+    console.error("Update order status error:", error);
+    return res.status(500).json({
+      message: "Internal server error",
+    });
   }
 };

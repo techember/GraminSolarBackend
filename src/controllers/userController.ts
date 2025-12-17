@@ -2,8 +2,12 @@ import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import config from "../config";
-import { User } from "../modals/User";
-import { signupSchema, loginSchema } from "../schemas/authSchemas";
+import { Contact, User } from "../modals/User";
+import {
+  signupSchema,
+  loginSchema,
+  contactSchema,
+} from "../schemas/authSchemas";
 
 export const signup = async (req: Request, res: Response): Promise<any> => {
   try {
@@ -150,4 +154,45 @@ export const logout = async (req: Request, res: Response): Promise<any> => {
   });
 
   return res.status(200).json({ message: "Logged out successfully" });
+};
+
+export const contact = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const { name, email, message } = await contactSchema.parseAsync(req.body);
+
+    if (!name) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    if (!email) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    if (!message) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    const contactMessage = new Contact({
+      name,
+      email,
+      message,
+    });
+
+    await contactMessage.save();
+
+    return res.json({
+      name: contactMessage.name,
+      email: contactMessage.email,
+      message: contactMessage.message,
+    });
+  } catch (error) {
+    if ((error as any)?.issues) {
+      return res.status(400).json({
+        message: "Contact failed",
+        errors: (error as any).issues,
+      });
+    }
+    console.error("Contact error:", error);
+    return res.status(500).json({ message: "Error submitting contact form" });
+  }
 };

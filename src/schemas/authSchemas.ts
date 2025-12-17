@@ -23,3 +23,9 @@ export const loginSchema = z.object({
     .min(8, "Password must be at least 8 characters")
     .max(32, "Password must be at most 32 characters"),
 });
+
+export const contactSchema = z.object({
+  name: z.string(),
+  email: z.string().email(),
+  message: z.string(),
+});

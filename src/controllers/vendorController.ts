@@ -7,33 +7,27 @@ import { Vendor } from "../modals/Vendor";
 
 export const signup = async (req: Request, res: Response): Promise<any> => {
   try {
-    // ⬇️ Updated fields added here
     console.log(req.body);
+
     const { fullName, address, aadhaarNo, panCard, email, password, phoneNo } =
       await signupSchema.parseAsync(req.body);
 
-    // Check duplicate email
-    const existingEmail = await Vendor.findOne({ email });
-    if (existingEmail) {
+    // Duplicate checks
+    if (await Vendor.findOne({ email })) {
       return res.status(400).json({ message: "Email already exists" });
     }
 
-    // Check duplicate Aadhaar
-    const existingAadhaar = await Vendor.findOne({ aadhaarNo });
-    if (existingAadhaar) {
+    if (await Vendor.findOne({ aadhaarNo })) {
       return res.status(400).json({ message: "Aadhaar already exists" });
     }
 
-    // Check duplicate PAN
-    const existingPan = await Vendor.findOne({ panCard });
-    if (existingPan) {
+    if (await Vendor.findOne({ panCard })) {
       return res.status(400).json({ message: "PAN already exists" });
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // ⬇️ Updated user creation
+    // STATUS ADDED (default: pending)
     const newVendor = new Vendor({
       fullName,
       address,
@@ -42,24 +36,26 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
       panCard,
       email,
       password: hashedPassword,
+      status: "pending", // added
     });
 
     await newVendor.save();
 
     return res.status(201).json({
-      message: "User created successfully",
+      message: "Vendor registered successfully",
       user: {
         id: newVendor._id,
-        fullName: newVendor.fullName, // ⬅️ Updated
+        fullName: newVendor.fullName,
         email: newVendor.email,
+        status: newVendor.status, // returned
       },
     });
   } catch (error) {
-    if (error instanceof Error && "issues" in error) {
-      console.log(error);
-      return res
-        .status(400)
-        .json({ message: "Validation failed", errors: error });
+    if ((error as any)?.issues) {
+      return res.status(400).json({
+        message: "Validation failed",
+        errors: (error as any).issues,
+      });
     }
 
     console.error("Signup error:", error);
@@ -72,13 +68,15 @@ export const login = async (req: Request, res: Response): Promise<any> => {
     const { email, password } = await loginSchema.parseAsync(req.body);
 
     const user = await Vendor.findOne({ email });
-    if (!user) return res.status(400).json({ message: "Invalid credentials" });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid)
+    if (!isPasswordValid) {
       return res.status(400).json({ message: "Invalid credentials" });
+    }
 
-    // Generate token
     const jwtToken = jwt.sign({ id: user._id }, config.JWT_PASSWORD, {
       expiresIn: "7d",
     });
@@ -95,12 +93,13 @@ export const login = async (req: Request, res: Response): Promise<any> => {
       token: jwtToken,
       user: {
         id: user._id,
-        fullName: user.fullName, // ⬅️ Updated
+        fullName: user.fullName,
         email: user.email,
+        status: user.status, // useful on frontend
       },
     });
   } catch (error) {
-    if (error instanceof Error && "issues" in error) {
+    if ((error as any)?.issues) {
       return res.status(400).json({
         message: "Validation failed",
         errors: (error as any).issues,
