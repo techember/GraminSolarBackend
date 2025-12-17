@@ -6,8 +6,8 @@ const userSchema = new mongoose.Schema(
     fullname: { type: String, required: true },
     address: { type: String, required: true },
     gmail: { type: String },
-    phoneNo: { type: Number, required: true },
-    consumerNumber: { type: Number, required: true },
+    phoneNo: { type: String, required: true },
+    consumerNumber: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     aadhaarNo: {
       type: String,
@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema(
       publicId: { type: String, required: true },
     },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 const contactSchema = new mongoose.Schema({

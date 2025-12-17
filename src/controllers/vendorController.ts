@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import config from "../config";
 import { signupSchema, loginSchema } from "../schemas/venderauthSchema";
 import { Vendor } from "../modals/Vendor";
+import { User } from "../modals/User";
 
 export const signup = async (req: Request, res: Response): Promise<any> => {
   try {
@@ -51,7 +52,9 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
       },
     });
   } catch (error) {
+    console.log(error);
     if ((error as any)?.issues) {
+      console.error("Signup validation error:", error);
       return res.status(400).json({
         message: "Validation failed",
         errors: (error as any).issues,
@@ -119,4 +122,23 @@ export const logout = async (req: Request, res: Response): Promise<any> => {
   });
 
   return res.status(200).json({ message: "Logged out successfully" });
+};
+
+export const getUsersByVendor = async (req: Request, res: Response) => {
+  try {
+    const { vendorId } = req.params;
+
+    const users = await User.find({ vendorId })
+      .select("-password")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      message: "Users under vendor fetched successfully",
+      totalUsers: users.length,
+      users,
+    });
+  } catch (error) {
+    console.error("Get users by vendor error:", error);
+    res.status(500).json({ message: "Failed to fetch vendor users" });
+  }
 };

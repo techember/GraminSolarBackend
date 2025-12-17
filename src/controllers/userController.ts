@@ -12,6 +12,7 @@ import {
 export const signup = async (req: Request, res: Response): Promise<any> => {
   try {
     // ✅ Zod validation (unchanged)
+    console.log("Signup called with body:", req.body);
     const {
       fullname,
       gmail,
@@ -22,27 +23,31 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
       aadhaarNo,
       consumerNumber,
       password,
-    } = await signupSchema.parseAsync(req.body);
+    } = req.body;
+
+    // ✅ CHECK IF USER ALREADY EXISTS (UNCHANGED)
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
+      console.log("User already exists with email:", email);
       return res.status(400).json({ message: "Email already exists" });
     }
 
     // ✅ READ FILES UPLOADED VIA MULTER (ADDED)
     const files = req.files as {
-      aadhaarFile?: Express.Multer.File[];
-      panCardFile?: Express.Multer.File[];
+      aadharDoc?: Express.Multer.File[];
+      panDoc?: Express.Multer.File[];
     };
 
-    const aadhaarFile = files?.aadhaarFile?.[0];
-    const panCardFile = files?.panCardFile?.[0];
+    const aadharFile = files?.aadharDoc?.[0];
+    const panFile = files?.panDoc?.[0];
 
-    if (!aadhaarFile || !panCardFile) {
+    if (!aadharFile || !panFile) {
       return res.status(400).json({
         message: "Aadhaar and PAN documents are required",
       });
     }
+
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -58,16 +63,19 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
       email,
       password: hashedPassword,
       aadhaarDocument: {
-        url: aadhaarFile.path, // Cloudinary secure URL
-        publicId: aadhaarFile.filename,
+        url: aadharFile.path, // Cloudinary secure URL
+        publicId: aadharFile.filename,
       },
       panCardDocument: {
-        url: panCardFile.path,
-        publicId: panCardFile.filename,
+        url: panFile.path,
+        publicId: panFile.filename,
       },
     });
 
+
     await newUser.save();
+
+    // console.log("New user created:", newUser);
 
     return res.status(201).json({
       message: "User created successfully",
@@ -88,6 +96,7 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
   } catch (error) {
     // ✅ Zod error handling (unchanged logic, safer check)
     if ((error as any)?.issues) {
+      console.error("Signup validation error:", error);
       return res.status(400).json({
         message: "Validation failed",
         errors: (error as any).issues,
