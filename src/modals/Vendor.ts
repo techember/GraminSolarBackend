@@ -30,6 +30,22 @@ const vendorSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  aadharDoc: {
+    type: String,
+    required: true,
+  },
+  panDoc: {
+    type: String,
+    required: true,
+  },
+  bankDoc: {
+    type: String,
+    required: true,   
+  },
+  paymentProof: {
+    type: String,
+    required: true,
+  },
   status: {
     type: String,
     enum: ["pending", "approved", "rejected"],
