@@ -7,7 +7,6 @@ const userRouter = Router();
 userRouter.post(
   "/signup",
   upload.fields([
-
     { name: "aadharDoc", maxCount: 1 },
     { name: "panDoc", maxCount: 1 },
   ]),
