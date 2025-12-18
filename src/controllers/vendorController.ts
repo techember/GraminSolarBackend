@@ -150,13 +150,13 @@ export const getVendorWithUsers = async (req: Request, res: Response) => {
   try {
     const { vendorId } = req.params;
 
-    const vendor = await Vendor.findById(vendorId).select("-password");
+    const vendor = await Vendor.findOne({email: vendorId}).select("-password");
 
     if (!vendor) {
       return res.status(404).json({ message: "Vendor not found" });
     }
 
-    const users = await User.find({ vendorId })
+    const users = await User.find({ gmail: vendorId })
       .select("-password")
       .sort({ createdAt: -1 });
 
