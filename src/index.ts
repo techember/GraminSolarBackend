@@ -25,7 +25,7 @@ app.use(
       "http://localhost:3000",
     ],
     credentials: true,
-  }),
+  })
 );
 
 app.use(express.json());
@@ -33,7 +33,7 @@ app.use(express.json());
 // Routes
 app.use("/api/userAuth", userRouter);
 app.use("/api/adminAuth", adminRouter);
-app.use("/api/venderAuth", vendorRouter);
+app.use("/api/vendorAuth", vendorRouter);
 app.use("/api/orders", orderRouter);
 
 // Start server
