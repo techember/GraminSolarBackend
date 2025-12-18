@@ -15,7 +15,7 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
     console.log("Signup called with body:", req.body);
     const {
       fullname,
-      gmail,
+      VendorReference,
       phoneNo,
       address,
       email,
@@ -48,12 +48,11 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
       });
     }
 
-
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // ✅ USER CREATION WITH CLOUDINARY URLS (ADDED)
     const newUser = new User({
-      gmail,
+      gmail: VendorReference || "",
       fullname,
       phoneNo,
       panCard,
@@ -71,7 +70,6 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
         publicId: panFile.filename,
       },
     });
-
 
     await newUser.save();
 
