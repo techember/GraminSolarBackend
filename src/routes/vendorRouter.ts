@@ -3,7 +3,7 @@ import {
   signup,
   logout,
   login,
-  getUsersByVendor,
+  getVendorWithUsers,
 } from "../controllers/vendorController";
 import { upload } from "../middlewares/upload";
 
@@ -21,6 +21,6 @@ vendorRouter.post(
 );
 vendorRouter.post("/login", login);
 vendorRouter.post("/logout", logout);
-vendorRouter.get("/getUsersByVendor/:vendorId", getUsersByVendor);
+vendorRouter.get("/getVendorWithUsers/:vendorId", getVendorWithUsers);
 
 export default vendorRouter;
