@@ -141,7 +141,12 @@ export const getUsersByVendor = async (req: Request, res: Response) => {
 
     const users = await User.find({ vendorId })
       .select("-password")
+      .populate({
+        path: "vendorId",
+        select: "fullName email phoneNo status address", // avoid password
+      })
       .sort({ createdAt: -1 });
+
 
     res.status(200).json({
       message: "Users under vendor fetched successfully",
