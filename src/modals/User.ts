@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema(
       publicId: { type: String, required: true },
     },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 const contactSchema = new mongoose.Schema({
