@@ -8,27 +8,49 @@ import { User } from "../modals/User";
 
 export const signup = async (req: Request, res: Response): Promise<any> => {
   try {
-    console.log(req.body);
+    console.log("BODY:", req.body);
+    console.log("FILES:", req.files);
 
     const { fullName, address, aadhaarNo, panCard, email, password, phoneNo } =
       await signupSchema.parseAsync(req.body);
 
+    console.log("Validated data:");
+
+    const files = req.files as {
+      [fieldname: string]: Express.Multer.File[];
+    };
+
+    if (
+      !files?.aadharDoc ||
+      !files?.panDoc ||
+      !files?.BankDetailsDoc ||
+      !files?.paymentProof
+    ) {
+      return res.status(400).json({
+        message: "All documents and payment proof are required",
+      });
+    }
+
+    console.log("All required files are present.");
+
     // Duplicate checks
     if (await Vendor.findOne({ email })) {
+      console.log("Email already exists:", email);
       return res.status(400).json({ message: "Email already exists" });
     }
-
     if (await Vendor.findOne({ aadhaarNo })) {
+      console.log("Aadhaar already exists:", aadhaarNo);
       return res.status(400).json({ message: "Aadhaar already exists" });
     }
-
     if (await Vendor.findOne({ panCard })) {
+      console.log("PAN already exists:", panCard);
       return res.status(400).json({ message: "PAN already exists" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // STATUS ADDED (default: pending)
+    console.log("Creating new Vendor...");
+
     const newVendor = new Vendor({
       fullName,
       address,
@@ -37,31 +59,31 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
       panCard,
       email,
       password: hashedPassword,
-      status: "pending", // added
+      status: "pending",
+
+      // ✅ FILE PATHS (example)
+      aadharDoc: files.aadharDoc[0].path,
+      panDoc: files.panDoc[0].path,
+      bankDoc: files.BankDetailsDoc[0].path,
+      paymentProof: files.paymentProof[0].path,
     });
 
     await newVendor.save();
 
     return res.status(201).json({
-      message: "Vendor registered successfully",
-      user: {
-        id: newVendor._id,
-        fullName: newVendor.fullName,
-        email: newVendor.email,
-        status: newVendor.status, // returned
-      },
+      message: "Vendor registered successfully, verification pending",
+      vendorId: newVendor._id,
     });
   } catch (error) {
-    console.log(error);
+    console.error("Vendor signup error:", error);
+
     if ((error as any)?.issues) {
-      console.error("Signup validation error:", error);
       return res.status(400).json({
         message: "Validation failed",
         errors: (error as any).issues,
       });
     }
 
-    console.error("Signup error:", error);
     return res.status(500).json({ message: "Error signing up" });
   }
 };

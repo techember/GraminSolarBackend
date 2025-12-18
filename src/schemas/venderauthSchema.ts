@@ -1,13 +1,16 @@
 import { z } from "zod";
 
 export const signupSchema = z.object({
-  fullName: z.string().min(3),
-  address: z.string().min(5),
+  fullName: z.string().min(1),
+  address: z.string().min(1),
   aadhaarNo: z.string().length(12),
-  panCard: z.string().min(10),
+  panCard: z.string().length(10),
   email: z.string().email(),
-  password: z.string().min(6),
-  phoneNo: z.string().min(10).max(10),
+  password: z.string().min(8),
+  phoneNo: z.string().length(10),
+
+  // ✅ allow extra field
+  registrationFee: z.string().optional(),
 });
 
 export const loginSchema = z.object({
