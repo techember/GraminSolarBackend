@@ -55,6 +55,10 @@ const vendorSchema = new mongoose.Schema({
     enum: ["pending", "approved", "rejected"],
     default: "pending",
   },
+  commission: {
+    type: Number,
+    default: 0,
+  },
 });
 
 export const Vendor = mongoose.model("Vendor", vendorSchema);

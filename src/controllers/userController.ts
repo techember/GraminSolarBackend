@@ -38,13 +38,15 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
       aadharfrontDoc?: Express.Multer.File[];
       aadharbackDoc?: Express.Multer.File[];
       panDoc?: Express.Multer.File[];
+      electricityDoc?: Express.Multer.File[];
     };
 
     const aadharfrontFile = files?.aadharfrontDoc?.[0];
     const aadharbackFile = files?.aadharbackDoc?.[0];
     const panFile = files?.panDoc?.[0];
+      const electricityFile = files?.electricityDoc?.[0];
 
-    if (!aadharfrontFile || !aadharbackFile || !panFile) {
+    if (!aadharfrontFile || !aadharbackFile || !panFile || !electricityFile) {
       return res.status(400).json({
         message: "Aadhaar and PAN documents are required",
       });
@@ -75,6 +77,10 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
         url: panFile.path,
         publicId: panFile.filename,
       },
+      electricityDocument: {
+        url: electricityFile.path,
+        publicId: electricityFile.filename,
+      },
     });
 
     await newUser.save();
@@ -96,6 +102,7 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
         aadhaarfrontUrl: newUser.aadhaarfrontDocument!.url,
         aadhaarbackUrl: newUser.aadhaarbackDocument!.url,
         panCardUrl: newUser.panCardDocument!.url,
+        electricityUrl: newUser.electricityDocument!.url,
       },
     });
   } catch (error) {
