@@ -13,6 +13,7 @@ vendorRouter.post(
   "/signup",
   upload.fields([
     { name: "aadharDoc", maxCount: 1 },
+    {name: "aadharbackDoc", maxCount: 1 },
     { name: "panDoc", maxCount: 1 },
     { name: "BankDetailsDoc", maxCount: 1 },
     { name: "paymentProof", maxCount: 1 },
