@@ -11,7 +11,7 @@ import orderRouter from "./routes/orderRoutes";
 mongoose
   .connect(config.MONGO_URL)
   .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => console.error("MongoDB connection error:", err));
+  .catch((err) => console.log("MongoDB connection error:", err));
 
 const app = express();
 app.use(cookieParser());

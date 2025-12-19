@@ -21,7 +21,8 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
     };
 
     if (
-      !files?.aadharDoc ||
+      !files?.aadharfrontDoc ||
+      !files?.aadharbackDoc ||
       !files?.panDoc ||
       !files?.BankDetailsDoc ||
       !files?.paymentProof
@@ -49,7 +50,7 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    console.log("Creating new Vendor...");
+    console.log("Creating new Vendor...");  
 
     const newVendor = new Vendor({
       fullName,
@@ -62,7 +63,8 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
       status: "pending",
 
       // ✅ FILE PATHS (example)
-      aadharDoc: files.aadharDoc[0].path,
+      aadharfrontDoc: files.aadharfrontDoc[0].path,
+      aadharbackDoc: files.aadharbackDoc[0].path,
       panDoc: files.panDoc[0].path,
       bankDoc: files.BankDetailsDoc[0].path,
       paymentProof: files.paymentProof[0].path,
@@ -75,7 +77,7 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
       vendorId: newVendor._id,
     });
   } catch (error) {
-    console.error("Vendor signup error:", error);
+    console.log("Vendor signup error:", error);
 
     if ((error as any)?.issues) {
       return res.status(400).json({
@@ -131,7 +133,7 @@ export const login = async (req: Request, res: Response): Promise<any> => {
       });
     }
 
-    console.error("Login error:", error);
+    console.log("Login error:", error);
     return res.status(500).json({ message: "Error logging in" });
   }
 };
@@ -167,7 +169,7 @@ export const getVendorWithUsers = async (req: Request, res: Response) => {
       users,
     });
   } catch (error) {
-    console.error("Get vendor with users error:", error);
+    console.log("Get vendor with users error:", error);
     res.status(500).json({ message: "Failed to fetch vendor details" });
   }
 };

@@ -7,6 +7,7 @@ import { Admin } from "../modals/Admin";
 import { User } from "../modals/User";
 import { Vendor } from "../modals/Vendor";
 import Order from "../modals/Order";
+import vendorRouter from "../routes/vendorRouter";
 
 // export const signup = async (req: Request, res: Response): Promise<any> => {
 //   try {
@@ -46,7 +47,7 @@ import Order from "../modals/Order";
 //         .json({ message: "Validation failed", errors: error });
 //     }
 
-//     console.error("Signup error:", error);
+//     console.log("Signup error:", error);
 //     return res.status(500).json({ message: "Error signing up" });
 //   }
 // };
@@ -86,14 +87,14 @@ export const login = async (req: Request, res: Response): Promise<any> => {
   } catch (error) {
     // Better error handling for Zod validation
     if (error instanceof Error && "issues" in error) {
-      console.error("Validation error:", error);
+      console.log("Validation error:", error);
       return res.status(400).json({
         message: "Validation failed",
         errors: (error as any).issues,
       });
     }
 
-    console.error("Login error:", error);
+    console.log("Login error:", error);
     return res.status(500).json({ message: "Error logging in" });
   }
 };
@@ -116,7 +117,7 @@ export const getAllUsers = async (req: Request, res: Response) => {
       users,
     });
   } catch (error) {
-    console.error("Get users error:", error);
+    console.log("Get users error:", error);
     res.status(500).json({ message: "Failed to fetch users" });
   }
 };
@@ -130,7 +131,7 @@ export const getAllVendors = async (req: Request, res: Response) => {
       vendors,
     });
   } catch (error) {
-    console.error("Get vendors error:", error);
+    console.log("Get vendors error:", error);
     res.status(500).json({ message: "Failed to fetch vendors" });
   }
 };
@@ -154,7 +155,7 @@ export const getUsersByVendor = async (req: Request, res: Response) => {
       users,
     });
   } catch (error) {
-    console.error("Get users by vendor error:", error);
+    console.log("Get users by vendor error:", error);
     res.status(500).json({ message: "Failed to fetch vendor users" });
   }
 };
@@ -200,7 +201,56 @@ export const updateOrderStatus = async (
       status: order.status,
     });
   } catch (error) {
-    console.error("Update order status error:", error);
+    console.log("Update order status error:", error);
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+export const updateVendorStatus = async (
+  req: Request,
+  res: Response,
+): Promise<any> => {
+  try {
+    const { vendorId } = req.params;
+    const { status } = req.body;
+
+    // ✅ VALID STATUS CHECK (MATCHES SCHEMA)
+    const allowedStatuses = ["pending", "approved", "rejected"];
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        message: "Invalid status. Allowed values: pending, approved, rejected",
+      });
+    }
+
+    // ✅ FIND ORDER
+    const vendor = await Vendor.findById(vendorId);
+    if (!vendor) {
+      return res.status(404).json({
+        message: "Vendor not found",
+      });
+    }
+
+    // ✅ OPTIONAL: Prevent re-verifying rejected orders
+    if (vendor.status === "approved") {
+      return res.status(400).json({
+        message: "Approved orders cannot be modified",
+      });
+    }
+
+    // ✅ UPDATE STATUS
+    vendor.status = status;
+
+    console.log(vendor)
+    await vendor.save();
+
+    return res.status(200).json({
+      message: "Vendor status updated successfully",
+      vendorId : vendor._id,
+      status: vendor.status,
+    });
+  } catch (error) {
+    console.log("Update vendor status error:", error);
     return res.status(500).json({
       message: "Internal server error",
     });

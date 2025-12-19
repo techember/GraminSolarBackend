@@ -30,7 +30,11 @@ const vendorSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  aadharDoc: {
+  aadharfrontDoc: {
+    type: String,
+    required: true,
+  },
+  aadharbackDoc: {
     type: String,
     required: true,
   },

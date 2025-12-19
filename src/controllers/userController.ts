@@ -35,14 +35,16 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
 
     // ✅ READ FILES UPLOADED VIA MULTER (ADDED)
     const files = req.files as {
-      aadharDoc?: Express.Multer.File[];
+      aadharfrontDoc?: Express.Multer.File[];
+      aadharbackDoc?: Express.Multer.File[];
       panDoc?: Express.Multer.File[];
     };
 
-    const aadharFile = files?.aadharDoc?.[0];
+    const aadharfrontFile = files?.aadharfrontDoc?.[0];
+    const aadharbackFile = files?.aadharbackDoc?.[0];
     const panFile = files?.panDoc?.[0];
 
-    if (!aadharFile || !panFile) {
+    if (!aadharfrontFile || !aadharbackFile || !panFile) {
       return res.status(400).json({
         message: "Aadhaar and PAN documents are required",
       });
@@ -61,9 +63,13 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
       address,
       email,
       password: hashedPassword,
-      aadhaarDocument: {
-        url: aadharFile.path, // Cloudinary secure URL
-        publicId: aadharFile.filename,
+      aadhaarfrontDocument: {
+        url: aadharfrontFile.path, // Cloudinary secure URL
+        publicId: aadharfrontFile.filename,
+      },
+      aadhaarbackDocument: {
+        url: aadharbackFile.path, // Cloudinary secure URL
+        publicId: aadharbackFile.filename,
       },
       panCardDocument: {
         url: panFile.path,
@@ -87,21 +93,22 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
         address: newUser.address,
         phoneNo: newUser.phoneNo,
         email: newUser.email,
-        aadhaarUrl: newUser.aadhaarDocument!.url,
+        aadhaarfrontUrl: newUser.aadhaarfrontDocument!.url,
+        aadhaarbackUrl: newUser.aadhaarbackDocument!.url,
         panCardUrl: newUser.panCardDocument!.url,
       },
     });
   } catch (error) {
     // ✅ Zod error handling (unchanged logic, safer check)
     if ((error as any)?.issues) {
-      console.error("Signup validation error:", error);
+      console.log("Signup validation error:", error);
       return res.status(400).json({
         message: "Validation failed",
         errors: (error as any).issues,
       });
     }
 
-    console.error("Signup error:", error);
+    console.log("Signup error:", error);
     return res.status(500).json({ message: "Error signing up" });
   }
 };
@@ -148,7 +155,7 @@ export const login = async (req: Request, res: Response): Promise<any> => {
       });
     }
 
-    console.error("Login error:", error);
+    console.log("Login error:", error);
     return res.status(500).json({ message: "Error logging in" });
   }
 };
@@ -199,7 +206,7 @@ export const contact = async (req: Request, res: Response): Promise<any> => {
         errors: (error as any).issues,
       });
     }
-    console.error("Contact error:", error);
+    console.log("Contact error:", error);
     return res.status(500).json({ message: "Error submitting contact form" });
   }
 };

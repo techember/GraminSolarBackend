@@ -20,7 +20,11 @@ const userSchema = new mongoose.Schema(
       unique: true,
     },
     password: { type: String, required: true },
-    aadhaarDocument: {
+    aadhaarfrontDocument: {
+      url: { type: String, required: true },
+      publicId: { type: String, required: true },
+    },
+    aadhaarbackDocument: {
       url: { type: String, required: true },
       publicId: { type: String, required: true },
     },
