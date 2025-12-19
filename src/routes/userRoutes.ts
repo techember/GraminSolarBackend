@@ -10,7 +10,7 @@ userRouter.post(
     { name: "aadharfrontDoc", maxCount: 1 },
     {name: "aadharbackDoc", maxCount: 1 },
     { name: "panDoc", maxCount: 1 },
-    { name: "electricityDoc", maxCount: 1 },
+    { name: "electricityBillDoc", maxCount: 1 }, 
   ]),
   signup
 );

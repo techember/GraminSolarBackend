@@ -38,13 +38,13 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
       aadharfrontDoc?: Express.Multer.File[];
       aadharbackDoc?: Express.Multer.File[];
       panDoc?: Express.Multer.File[];
-      electricityDoc?: Express.Multer.File[];
+      electricityBillDoc?: Express.Multer.File[];
     };
 
     const aadharfrontFile = files?.aadharfrontDoc?.[0];
     const aadharbackFile = files?.aadharbackDoc?.[0];
     const panFile = files?.panDoc?.[0];
-      const electricityFile = files?.electricityDoc?.[0];
+    const electricityFile = files?.electricityBillDoc?.[0];
 
     if (!aadharfrontFile || !aadharbackFile || !panFile || !electricityFile) {
       return res.status(400).json({
