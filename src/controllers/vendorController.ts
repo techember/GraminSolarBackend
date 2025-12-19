@@ -14,7 +14,7 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
     const { fullName, address, aadhaarNo, panCard, email, password, phoneNo } =
       await signupSchema.parseAsync(req.body);
 
-    console.log("Validated data:");
+    console.log("Validated data:",req.files);
 
     const files = req.files as {
       [fieldname: string]: Express.Multer.File[];
