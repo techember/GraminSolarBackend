@@ -7,6 +7,7 @@ import {
   getUsersByVendor,
   updateOrderStatus,
   updateVendorStatus,
+  updateVendorCommission,
 } from "../controllers/adminController";
 
 const adminRouter = Router();
@@ -19,5 +20,6 @@ adminRouter.get("/getallvendors", getAllVendors);
 adminRouter.get("/vendor/:vendorId/users", getUsersByVendor);
 adminRouter.patch("/orders/:orderId/status", updateOrderStatus);
 adminRouter.patch("/vendor/:vendorId/status", updateVendorStatus);
+adminRouter.patch("/vendor/:vendorId/commission", updateVendorCommission);
 
 export default adminRouter;

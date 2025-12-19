@@ -256,3 +256,50 @@ export const updateVendorStatus = async (
     });
   }
 };
+
+export const updateVendorCommission = async (
+  req: Request,
+  res: Response,
+): Promise<any> => {
+  try {
+    const { vendorId } = req.params;
+    const { commission } = req.body;
+
+    // ✅ VALIDATE COMMISSION
+    if (commission === undefined || commission === null) {
+      return res.status(400).json({
+        message: "Commission amount is required",
+      });
+    }
+
+    if (typeof commission !== "number" || commission < 0) {
+      return res.status(400).json({
+        message: "Commission must be a non-negative number",
+      });
+    }
+
+    // ✅ FIND VENDOR
+    const vendor = await Vendor.findById(vendorId);
+    if (!vendor) {
+      return res.status(404).json({
+        message: "Vendor not found",
+      });
+    }
+
+    // ✅ UPDATE COMMISSION
+    vendor.commission = commission;
+    await vendor.save();
+
+    return res.status(200).json({
+      message: "Vendor commission updated successfully",
+      vendorId: vendor._id,
+      vendorName: vendor.fullName,
+      commission: vendor.commission,
+    });
+  } catch (error) {
+    console.error("Update vendor commission error:", error);
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
