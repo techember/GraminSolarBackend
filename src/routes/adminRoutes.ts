@@ -18,8 +18,8 @@ adminRouter.post("/logout", logout);
 adminRouter.get("/getalluser", getAllUsers);
 adminRouter.get("/getallvendors", getAllVendors);
 adminRouter.get("/vendor/:vendorId/users", getUsersByVendor);
-adminRouter.patch("/orders/:orderId/status", updateOrderStatus);
-adminRouter.patch("/vendor/:vendorId/status", updateVendorStatus);
-adminRouter.patch("/vendor/:vendorId/commission", updateVendorCommission);
+adminRouter.put("/orders/:orderId/status", updateOrderStatus);
+adminRouter.put("/vendor/:vendorId/status", updateVendorStatus);
+adminRouter.put("/vendor/:vendorId/commission", updateVendorCommission);
 
 export default adminRouter;
