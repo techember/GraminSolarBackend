@@ -281,6 +281,7 @@ export const updateVendorCommission = async (
 
     // ✅ UPDATE COMMISSION
     vendor.commission = commission;
+    console.log(vendor)
     await vendor.save();
 
     return res.status(200).json({
