@@ -310,7 +310,7 @@ export const updateMyProfile = async (
     };
 
     if (files?.aadharDoc?.[0]) {
-      user.aadhaarDocument = {
+      user.aadhaarbackDocument = {
         url: files.aadharDoc[0].path,
         publicId: files.aadharDoc[0].filename,
       };
@@ -337,7 +337,7 @@ export const updateMyProfile = async (
         email: user.email,
         aadhaarNo: user.aadhaarNo,
         panCard: user.panCard,
-        aadhaarUrl: user.aadhaarDocument?.url,
+        aadhaarUrl: user.aadhaarbackDocument?.url,
         panCardUrl: user.panCardDocument?.url,
       },
     });
