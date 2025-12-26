@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import Order from "../modals/Order";
+import { User } from '../modals/User';
 
 export const createOrder = async (req: Request, res: Response) => {
   console.log("Create Order called with body:", req.body);

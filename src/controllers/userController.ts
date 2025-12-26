@@ -11,7 +11,6 @@ import {
 
 export const signup = async (req: Request, res: Response): Promise<any> => {
   try {
-    // ✅ Zod validation (unchanged)
     console.log("Signup called with body:", req.body);
     const {
       fullname,
@@ -25,15 +24,14 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
       password,
     } = req.body;
 
-    // ✅ CHECK IF USER ALREADY EXISTS (UNCHANGED)
-
+    // CHECK IF USER ALREADY EXISTS (UNCHANGED)
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       console.log("User already exists with email:", email);
       return res.status(400).json({ message: "Email already exists" });
     }
 
-    // ✅ READ FILES UPLOADED VIA MULTER (ADDED)
+    // READ FILES UPLOADED VIA MULTER (UNCHANGED)
     const files = req.files as {
       aadharfrontDoc?: Express.Multer.File[];
       aadharbackDoc?: Express.Multer.File[];
@@ -54,7 +52,7 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // ✅ USER CREATION WITH CLOUDINARY URLS (ADDED)
+    // USER CREATION (UNCHANGED)
     const newUser = new User({
       gmail: VendorReference || "",
       fullname,
@@ -66,11 +64,11 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
       email,
       password: hashedPassword,
       aadhaarfrontDocument: {
-        url: aadharfrontFile.path, // Cloudinary secure URL
+        url: aadharfrontFile.path,
         publicId: aadharfrontFile.filename,
       },
       aadhaarbackDocument: {
-        url: aadharbackFile.path, // Cloudinary secure URL
+        url: aadharbackFile.path,
         publicId: aadharbackFile.filename,
       },
       panCardDocument: {
@@ -85,10 +83,20 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
 
     await newUser.save();
 
-    // console.log("New user created:", newUser);
+    const jwtToken = jwt.sign({ id: newUser._id }, config.JWT_PASSWORD, {
+      expiresIn: "7d",
+    });
+
+    res.cookie("token", jwtToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
 
     return res.status(201).json({
       message: "User created successfully",
+      token: jwtToken, 
       user: {
         id: newUser._id,
         fullname: newUser.fullname,
@@ -106,7 +114,6 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
       },
     });
   } catch (error) {
-    // ✅ Zod error handling (unchanged logic, safer check)
     if ((error as any)?.issues) {
       console.log("Signup validation error:", error);
       return res.status(400).json({
@@ -119,6 +126,7 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
     return res.status(500).json({ message: "Error signing up" });
   }
 };
+
 
 export const login = async (req: Request, res: Response): Promise<any> => {
   try {
