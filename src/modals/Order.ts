@@ -2,11 +2,18 @@ import mongoose from "mongoose";
 
 const orderSchema = new mongoose.Schema(
   {
+    orderId: {
+      type: String,
+      unique: true,
+      index: true,
+    },
+
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
+
     power: {
       type: String,
       required: true,
@@ -29,7 +36,7 @@ const orderSchema = new mongoose.Schema(
 
     isReferred: {
       type: Boolean,
-      default: false, // ✅ FIX
+      default: false,
     },
 
     location: {
@@ -44,7 +51,7 @@ const orderSchema = new mongoose.Schema(
     },
 
     paymentProof: {
-      type: String, // S3 / Cloudinary / local path
+      type: String,
       required: true,
     },
 
@@ -56,5 +63,17 @@ const orderSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+orderSchema.pre("save", async function (next) {
+  if (this.orderId) return next();
+
+  const count = await mongoose.model("Order").countDocuments();
+
+  const year = new Date().getFullYear();
+  this.orderId = `ORD-${year}-${String(count + 1).padStart(6, "0")}`;
+
+  next();
+});
+
 
 export default mongoose.model("Order", orderSchema);

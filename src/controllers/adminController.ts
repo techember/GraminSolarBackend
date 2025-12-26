@@ -168,7 +168,7 @@ export const updateOrderStatus = async (
     const { orderId } = req.params;
     const { status } = req.body;
 
-    // ✅ VALID STATUS CHECK (MATCHES SCHEMA)
+    // VALID STATUS CHECK (MATCHES SCHEMA)
     const allowedStatuses = ["pending", "verified", "rejected"];
     if (!allowedStatuses.includes(status)) {
       return res.status(400).json({
@@ -176,7 +176,7 @@ export const updateOrderStatus = async (
       });
     }
 
-    // ✅ FIND ORDER
+    // FIND ORDER
     const order = await Order.findById(orderId);
     if (!order) {
       return res.status(404).json({
@@ -184,14 +184,7 @@ export const updateOrderStatus = async (
       });
     }
 
-    // ✅ OPTIONAL: Prevent re-verifying rejected orders
-    if (order.status === "verified") {
-      return res.status(400).json({
-        message: "Verified orders cannot be modified",
-      });
-    }
-
-    // ✅ UPDATE STATUS
+    // UPDATE STATUS
     order.status = status;
     await order.save();
 

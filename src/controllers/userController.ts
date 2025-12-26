@@ -217,3 +217,132 @@ export const contact = async (req: Request, res: Response): Promise<any> => {
     return res.status(500).json({ message: "Error submitting contact form" });
   }
 };
+
+export const getMyProfile = async (
+  req: Request,
+  res: Response,
+): Promise<any> => {
+  try {
+    const userId = (req as any).userId;
+
+    const user = await User.findById(userId).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({ user });
+  } catch (error) {
+    console.error("Get profile error:", error);
+    return res.status(500).json({
+      message: "Server error",
+    });
+  }
+};
+
+
+export const updateMyProfile = async (
+  req: Request,
+  res: Response,
+): Promise<any> => {
+  try {
+    const userId = (req as any).userId;
+    const updates = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // UNIQUE FIELD CHECKS
+    if (updates.email && updates.email !== user.email) {
+      const emailExists = await User.findOne({ email: updates.email });
+      if (emailExists) {
+        return res.status(400).json({ message: "Email already in use" });
+      }
+    }
+
+    if (updates.aadhaarNo && updates.aadhaarNo !== user.aadhaarNo) {
+      const aadhaarExists = await User.findOne({
+        aadhaarNo: updates.aadhaarNo,
+      });
+      if (aadhaarExists) {
+        return res.status(400).json({ message: "Aadhaar already in use" });
+      }
+    }
+
+    if (updates.panCard && updates.panCard !== user.panCard) {
+      const panExists = await User.findOne({ panCard: updates.panCard });
+      if (panExists) {
+        return res.status(400).json({ message: "PAN already in use" });
+      }
+    }
+
+    // PASSWORD UPDATE (RE-HASH)
+    if (updates.password) {
+      user.password = await bcrypt.hash(updates.password, 10);
+    }
+
+    // NORMAL FIELD UPDATES
+    const editableFields = [
+      "fullname",
+      "address",
+      "gmail",
+      "phoneNo",
+      "consumerNumber",
+      "email",
+      "aadhaarNo",
+      "panCard",
+    ] as const;
+
+    editableFields.forEach((field) => {
+      if (updates[field]) {
+        (user as any)[field] = updates[field];
+      }
+    });
+
+    // DOCUMENT UPDATES
+    const files = req.files as {
+      aadharDoc?: Express.Multer.File[];
+      panDoc?: Express.Multer.File[];
+    };
+
+    if (files?.aadharDoc?.[0]) {
+      user.aadhaarDocument = {
+        url: files.aadharDoc[0].path,
+        publicId: files.aadharDoc[0].filename,
+      };
+    }
+
+    if (files?.panDoc?.[0]) {
+      user.panCardDocument = {
+        url: files.panDoc[0].path,
+        publicId: files.panDoc[0].filename,
+      };
+    }
+
+    await user.save();
+
+    return res.status(200).json({
+      message: "Profile updated successfully",
+      user: {
+        id: user._id,
+        fullname: user.fullname,
+        address: user.address,
+        gmail: user.gmail,
+        phoneNo: user.phoneNo,
+        consumerNumber: user.consumerNumber,
+        email: user.email,
+        aadhaarNo: user.aadhaarNo,
+        panCard: user.panCard,
+        aadhaarUrl: user.aadhaarDocument?.url,
+        panCardUrl: user.panCardDocument?.url,
+      },
+    });
+  } catch (error) {
+    console.error("Update profile error:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
