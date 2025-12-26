@@ -159,6 +159,7 @@ export const getOrdersByUser = async (
 ): Promise<any> => {
   try {
     const { userId } = req.params;
+    console.log("Fetching orders for userId:", userId);
 
     const orders = await Order.find({ user: userId })
       .populate("user", "-password")
