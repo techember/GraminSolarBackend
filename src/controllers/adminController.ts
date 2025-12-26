@@ -169,7 +169,7 @@ export const updateOrderStatus = async (
     const { status } = req.body;
 
     // VALID STATUS CHECK (MATCHES SCHEMA)
-    const allowedStatuses = ["pending", "verified", "rejected"];
+    const allowedStatuses = ["pending", "verified", "rejected", "completed"];
     if (!allowedStatuses.includes(status)) {
       return res.status(400).json({
         message: "Invalid status. Allowed values: pending, verified, rejected",

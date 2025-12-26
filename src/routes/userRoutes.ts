@@ -31,9 +31,11 @@ userRouter.put(
   "/me",
   protect,
   upload.fields([
-    { name: "aadharDoc", maxCount: 1 },
-    { name: "panDoc", maxCount: 1 },
-  ]),
+  { name: "aadharfrontDoc", maxCount: 1 },
+  { name: "aadharbackDoc", maxCount: 1 },
+  { name: "panDoc", maxCount: 1 },
+  { name: "electricityBillDoc", maxCount: 1 },
+]),
   updateMyProfile,
 );
 

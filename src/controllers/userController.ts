@@ -305,14 +305,23 @@ export const updateMyProfile = async (
 
     // DOCUMENT UPDATES
     const files = req.files as {
-      aadharDoc?: Express.Multer.File[];
+      aadharfrontDoc?: Express.Multer.File[];
+      aadharbackDoc?: Express.Multer.File[];
       panDoc?: Express.Multer.File[];
+      electricityBillDoc?: Express.Multer.File[];
     };
 
-    if (files?.aadharDoc?.[0]) {
+    if (files?.aadharfrontDoc?.[0]) {
+      user.aadhaarfrontDocument = {
+        url: files.aadharfrontDoc[0].path,
+        publicId: files.aadharfrontDoc[0].filename,
+      };
+    }
+
+    if (files?.aadharbackDoc?.[0]) {
       user.aadhaarbackDocument = {
-        url: files.aadharDoc[0].path,
-        publicId: files.aadharDoc[0].filename,
+        url: files.aadharbackDoc[0].path,
+        publicId: files.aadharbackDoc[0].filename,
       };
     }
 
@@ -320,6 +329,13 @@ export const updateMyProfile = async (
       user.panCardDocument = {
         url: files.panDoc[0].path,
         publicId: files.panDoc[0].filename,
+      };
+    }
+
+    if (files?.electricityBillDoc?.[0]) {
+      user.electricityDocument = {
+        url: files.electricityBillDoc[0].path,
+        publicId: files.electricityBillDoc[0].filename,
       };
     }
 
@@ -337,8 +353,10 @@ export const updateMyProfile = async (
         email: user.email,
         aadhaarNo: user.aadhaarNo,
         panCard: user.panCard,
-        aadhaarUrl: user.aadhaarbackDocument?.url,
+        aadhaarFrontUrl: user.aadhaarfrontDocument?.url,
+        aadhaarBackUrl: user.aadhaarbackDocument?.url,
         panCardUrl: user.panCardDocument?.url,
+        electricityUrl: user.electricityDocument?.url,
       },
     });
   } catch (error) {
