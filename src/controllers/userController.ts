@@ -155,7 +155,9 @@ export const login = async (req: Request, res: Response): Promise<any> => {
     await user.save();
 
     // 📩 Send SMS via Renflair
-    await sendOtpViaRenflair(user.phoneNo, otp);
+    const res= await sendOtpViaRenflair(user.phoneNo, otp);
+    console.log("Wait", user.phoneNo, otp);
+    console.log("renflaire",res);
 
     return res.status(200).json({
       message: "OTP sent successfully",
