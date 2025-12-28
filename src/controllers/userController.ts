@@ -8,6 +8,8 @@ import {
   loginSchema,
   contactSchema,
 } from "../schemas/authSchemas";
+import crypto from "crypto";
+import { sendOtpViaRenflair } from "../utils/renflairsms";
 
 export const signup = async (req: Request, res: Response): Promise<any> => {
   try {
@@ -130,7 +132,7 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
 
 export const login = async (req: Request, res: Response): Promise<any> => {
   try {
-    const { email, password } = await loginSchema.parseAsync(req.body);
+    const { email, password } = req.body;
 
     const user = await User.findOne({ email });
     if (!user) {
@@ -142,38 +144,29 @@ export const login = async (req: Request, res: Response): Promise<any> => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const jwtToken = jwt.sign({ id: user._id }, config.JWT_PASSWORD, {
-      expiresIn: "7d",
-    });
+    // 🔐 Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    res.cookie("token", jwtToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    // 🔒 Hash OTP before storing
+    const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
 
-    return res.json({
-      message: "Login successful",
-      token: jwtToken,
-      user: {
-        id: user._id,
-        fullname: user.fullname,
-        email: user.email,
-      },
+    user.loginOtp = hashedOtp;
+    user.loginOtpExpiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 mins
+    await user.save();
+
+    // 📩 Send SMS via Renflair
+    await sendOtpViaRenflair(user.phoneNo, otp);
+
+    return res.status(200).json({
+      message: "OTP sent successfully",
+      userId: user._id,
     });
   } catch (error) {
-    if ((error as any)?.issues) {
-      return res.status(400).json({
-        message: "Validation failed",
-        errors: (error as any).issues,
-      });
-    }
-
-    console.log("Login error:", error);
-    return res.status(500).json({ message: "Error logging in" });
+    console.error(error);
+    return res.status(500).json({ message: "Failed to send OTP" });
   }
 };
+
 
 export const logout = async (req: Request, res: Response): Promise<any> => {
   res.clearCookie("token", {
@@ -370,5 +363,55 @@ export const updateMyProfile = async (
   } catch (error) {
     console.error("Update profile error:", error);
     return res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+export const verifyLoginOtp = async (
+  req: Request,
+  res: Response,
+): Promise<any> => {
+  try {
+    const { userId, otp } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user || !user.loginOtp) {
+      return res.status(400).json({ message: "Invalid request" });
+    }
+
+    if (user.loginOtpExpiresAt! < new Date()) {
+      return res.status(400).json({ message: "OTP expired" });
+    }
+
+    const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
+
+    if (hashedOtp !== user.loginOtp) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+
+    // OTP verified → cleanup
+    user.loginOtp = undefined;
+    user.loginOtpExpiresAt = undefined;
+    await user.save();
+
+    // Issue JWT
+    const token = jwt.sign({ id: user._id }, config.JWT_PASSWORD, {
+      expiresIn: "7d",
+    });
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return res.status(200).json({
+      message: "Login successful",
+      token,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "OTP verification failed" });
   }
 };

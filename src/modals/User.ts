@@ -36,8 +36,14 @@ const userSchema = new mongoose.Schema(
       url: { type: String, required: true },
       publicId: { type: String, required: true },
     },
+    loginOtp: {
+      type: String,
+    },
+    loginOtpExpiresAt: {
+      type: Date,
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const contactSchema = new mongoose.Schema({
