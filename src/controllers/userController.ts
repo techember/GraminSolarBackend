@@ -413,7 +413,7 @@ export const verifyLoginOtp = async (
       token,
       user: {
         id: user._id,
-        username: user.username,
+        username: user.fullname,
         email: user.email,
       },
     });
