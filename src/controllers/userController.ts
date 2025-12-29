@@ -16,7 +16,7 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
   console.log(req.body);
   try {
     const {
-      fullname,
+      fullName,
       VendorReference,
       phoneNo,
       address,
@@ -55,7 +55,7 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
     const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
 
     const user = new User({
-      fullname,
+      fullName,
       gmail: VendorReference || "",
       phoneNo,
       address,
