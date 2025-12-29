@@ -27,7 +27,7 @@ export const signup = async (
       aadharfrontDoc?: Express.Multer.File[];
       aadharbackDoc?: Express.Multer.File[];
       panDoc?: Express.Multer.File[];
-      bankDoc?: Express.Multer.File[];
+      BankDetailsDoc?: Express.Multer.File[];
       paymentProof?: Express.Multer.File[];
     };
 
@@ -35,7 +35,7 @@ export const signup = async (
       !files?.aadharfrontDoc?.[0] ||
       !files?.aadharbackDoc?.[0] ||
       !files?.panDoc?.[0] ||
-      !files?.bankDoc?.[0] ||
+      !files?.BankDetailsDoc?.[0] ||
       !files?.paymentProof?.[0]
     ) {
       return res.status(400).json({ message: "All documents required" });
@@ -61,7 +61,7 @@ export const signup = async (
       aadharfrontDoc: files.aadharfrontDoc[0].path,
       aadharbackDoc: files.aadharbackDoc[0].path,
       panDoc: files.panDoc[0].path,
-      bankDoc: files.bankDoc[0].path,
+      bankDoc: files.BankDetailsDoc[0].path,
       paymentProof: files.paymentProof[0].path,
     });
 
