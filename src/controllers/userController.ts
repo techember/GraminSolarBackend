@@ -395,6 +395,7 @@ export const verifySignupOtp = async (
   res: Response,
 ): Promise<any> => {
   try {
+    console.log(req.body);
     const { id, otp, role } = req.body; // role: "user" | "vendor"
 
     const account = role === "vendor" ? await Vendor.findById(id) : await User.findById(id);
