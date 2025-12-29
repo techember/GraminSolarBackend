@@ -67,7 +67,8 @@ export const signup = async (
 
     await vendor.save();
 
-    await sendOtpViaRenflair(phoneNo, otp);
+    const res1 = await sendOtpViaRenflair(phoneNo, otp);
+    console.log("renflaire",res1);
 
     return res.status(201).json({
       message: "OTP sent. Verify to activate vendor account.",
