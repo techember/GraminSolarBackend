@@ -60,6 +60,10 @@ const orderSchema = new mongoose.Schema(
       enum: ["pending", "verified", "completed", "rejected"],
       default: "pending",
     },
+    processingMailSent: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true },
 );

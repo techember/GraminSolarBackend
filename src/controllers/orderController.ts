@@ -1,6 +1,13 @@
 import { Request, Response } from "express";
 import Order from "../modals/Order";
 import { User } from '../modals/User';
+import { sendOrderPlacedSms } from "../utils/renflairsms";
+
+interface AuthRequest extends Request {
+  user?: {
+    id: string;
+  };
+}
 
 export const createOrder = async (req: Request, res: Response) => {
   console.log("Create Order called with body:", req.body);
@@ -200,6 +207,46 @@ export const getOrderByOrderId = async (req: Request, res: Response) => {
     console.error("Get order by orderId error:", error);
     res.status(500).json({
       message: "Server error",
+    });
+  }
+};
+
+export const placeOrder = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user?.id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    // Fetch full user safely
+    const user = await User.findById(req.user.id);
+
+    if (!user || !user.phoneNo) {
+      return res.status(400).json({
+        message: "User phone number not found",
+      });
+    }
+
+    const order = await Order.create({
+      ...req.body,
+      user: user._id,
+    });
+
+    // orderId is guaranteed AFTER save
+    if (!order.orderId) {
+      throw new Error("Order ID not generated");
+    }
+
+    // SEND ORDER PLACED SMS (WITH CUSTOMER NAME)
+    await sendOrderPlacedSms(user.phoneNo, user.fullname, order.orderId);
+
+    return res.status(201).json({
+      message: "Order placed successfully",
+      order,
+    });
+  } catch (error) {
+    console.error("Order error:", error);
+    return res.status(500).json({
+      message: "Failed to place order",
     });
   }
 };

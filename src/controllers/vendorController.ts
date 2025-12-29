@@ -5,88 +5,75 @@ import config from "../config";
 import { signupSchema, loginSchema } from "../schemas/venderauthSchema";
 import { Vendor } from "../modals/Vendor";
 import { User } from "../modals/User";
+import crypto from "crypto";
+import { sendOtpViaRenflair } from "../utils/renflairsms";
 
-export const signup = async (req: Request, res: Response): Promise<any> => {
+export const signup = async (
+  req: Request,
+  res: Response,
+): Promise<any> => {
   try {
-    console.log("BODY:", req.body);
-    console.log("FILES:", req.files);
-
     const { fullName, address, aadhaarNo, panCard, email, password, phoneNo } =
-      await signupSchema.parseAsync(req.body);
+      req.body;
 
-    console.log("Validated data:",req.files);
+    const existingVendor = await Vendor.findOne({ email });
+    if (existingVendor) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
 
     const files = req.files as {
-      [fieldname: string]: Express.Multer.File[];
+      aadharfrontDoc?: Express.Multer.File[];
+      aadharbackDoc?: Express.Multer.File[];
+      panDoc?: Express.Multer.File[];
+      bankDoc?: Express.Multer.File[];
+      paymentProof?: Express.Multer.File[];
     };
 
     if (
-      !files?.aadharfrontDoc ||
-      !files?.aadharbackDoc ||
-      !files?.panDoc ||
-      !files?.BankDetailsDoc ||
-      !files?.paymentProof
+      !files?.aadharfrontDoc?.[0] ||
+      !files?.aadharbackDoc?.[0] ||
+      !files?.panDoc?.[0] ||
+      !files?.bankDoc?.[0] ||
+      !files?.paymentProof?.[0]
     ) {
-      return res.status(400).json({
-        message: "All documents and payment proof are required",
-      });
-    }
-
-    console.log("All required files are present.");
-
-    // Duplicate checks
-    if (await Vendor.findOne({ email })) {
-      console.log("Email already exists:", email);
-      return res.status(400).json({ message: "Email already exists" });
-    }
-    if (await Vendor.findOne({ aadhaarNo })) {
-      console.log("Aadhaar already exists:", aadhaarNo);
-      return res.status(400).json({ message: "Aadhaar already exists" });
-    }
-    if (await Vendor.findOne({ panCard })) {
-      console.log("PAN already exists:", panCard);
-      return res.status(400).json({ message: "PAN already exists" });
+      return res.status(400).json({ message: "All documents required" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    console.log("Creating new Vendor...");  
+    const otp = crypto.randomInt(100000, 999999).toString();
+    const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
 
-    const newVendor = new Vendor({
+    const vendor = new Vendor({
       fullName,
       address,
-      phoneNo,
       aadhaarNo,
       panCard,
       email,
+      phoneNo,
       password: hashedPassword,
-      status: "pending",
+      isPhoneVerified: false,
+      signupOtp: hashedOtp,
+      signupOtpExpiresAt: new Date(Date.now() + 5 * 60 * 1000),
 
-      // ✅ FILE PATHS (example)
       aadharfrontDoc: files.aadharfrontDoc[0].path,
       aadharbackDoc: files.aadharbackDoc[0].path,
       panDoc: files.panDoc[0].path,
-      bankDoc: files.BankDetailsDoc[0].path,
+      bankDoc: files.bankDoc[0].path,
       paymentProof: files.paymentProof[0].path,
     });
 
-    await newVendor.save();
+    await vendor.save();
+
+    await sendOtpViaRenflair(phoneNo, otp);
 
     return res.status(201).json({
-      message: "Vendor registered successfully, verification pending",
-      vendorId: newVendor._id,
+      message: "OTP sent. Verify to activate vendor account.",
+      vendorId: vendor._id,
     });
-  } catch (error) {
-    console.log("Vendor signup error:", error);
-
-    if ((error as any)?.issues) {
-      return res.status(400).json({
-        message: "Validation failed",
-        errors: (error as any).issues,
-      });
-    }
-
-    return res.status(500).json({ message: "Error signing up" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Vendor signup failed" });
   }
 };
 

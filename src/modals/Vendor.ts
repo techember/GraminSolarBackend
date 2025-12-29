@@ -44,7 +44,7 @@ const vendorSchema = new mongoose.Schema({
   },
   bankDoc: {
     type: String,
-    required: true,   
+    required: true,
   },
   paymentProof: {
     type: String,
@@ -58,6 +58,16 @@ const vendorSchema = new mongoose.Schema({
   commission: {
     type: Number,
     default: 0,
+  },
+  signupOtp: {
+    type: String,
+  },
+  signupOtpExpiresAt: {
+    type: Date,
+  },
+  isPhoneVerified: {
+    type: Boolean,
+    default: false,
   },
 });
 

@@ -10,10 +10,10 @@ import {
 } from "../schemas/authSchemas";
 import crypto from "crypto";
 import { sendOtpViaRenflair } from "../utils/renflairsms";
+import { Vendor } from "../modals/Vendor";
 
 export const signup = async (req: Request, res: Response): Promise<any> => {
   try {
-    console.log("Signup called with body:", req.body);
     const {
       fullname,
       VendorReference,
@@ -26,14 +26,11 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
       password,
     } = req.body;
 
-    // CHECK IF USER ALREADY EXISTS (UNCHANGED)
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      console.log("User already exists with email:", email);
       return res.status(400).json({ message: "Email already exists" });
     }
 
-    // READ FILES UPLOADED VIA MULTER (UNCHANGED)
     const files = req.files as {
       aadharfrontDoc?: Express.Multer.File[];
       aadharbackDoc?: Express.Multer.File[];
@@ -41,94 +38,66 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
       electricityBillDoc?: Express.Multer.File[];
     };
 
-    const aadharfrontFile = files?.aadharfrontDoc?.[0];
-    const aadharbackFile = files?.aadharbackDoc?.[0];
-    const panFile = files?.panDoc?.[0];
-    const electricityFile = files?.electricityBillDoc?.[0];
-
-    if (!aadharfrontFile || !aadharbackFile || !panFile || !electricityFile) {
-      return res.status(400).json({
-        message: "Aadhaar and PAN documents are required",
-      });
+    if (
+      !files?.aadharfrontDoc?.[0] ||
+      !files?.aadharbackDoc?.[0] ||
+      !files?.panDoc?.[0] ||
+      !files?.electricityBillDoc?.[0]
+    ) {
+      return res.status(400).json({ message: "All documents are required" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // USER CREATION (UNCHANGED)
-    const newUser = new User({
-      gmail: VendorReference || "",
+    // Generate OTP
+    const otp = crypto.randomInt(100000, 999999).toString();
+    const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
+
+    const user = new User({
       fullname,
+      gmail: VendorReference || "",
       phoneNo,
+      address,
+      email,
       panCard,
       aadhaarNo,
       consumerNumber,
-      address,
-      email,
       password: hashedPassword,
+      isPhoneVerified: false,
+      signupOtp: hashedOtp,
+      signupOtpExpiresAt: new Date(Date.now() + 5 * 60 * 1000),
+
       aadhaarfrontDocument: {
-        url: aadharfrontFile.path,
-        publicId: aadharfrontFile.filename,
+        url: files.aadharfrontDoc[0].path,
+        publicId: files.aadharfrontDoc[0].filename,
       },
       aadhaarbackDocument: {
-        url: aadharbackFile.path,
-        publicId: aadharbackFile.filename,
+        url: files.aadharbackDoc[0].path,
+        publicId: files.aadharbackDoc[0].filename,
       },
       panCardDocument: {
-        url: panFile.path,
-        publicId: panFile.filename,
+        url: files.panDoc[0].path,
+        publicId: files.panDoc[0].filename,
       },
       electricityDocument: {
-        url: electricityFile.path,
-        publicId: electricityFile.filename,
+        url: files.electricityBillDoc[0].path,
+        publicId: files.electricityBillDoc[0].filename,
       },
     });
 
-    await newUser.save();
+    await user.save();
 
-    const jwtToken = jwt.sign({ id: newUser._id }, config.JWT_PASSWORD, {
-      expiresIn: "7d",
-    });
-
-    res.cookie("token", jwtToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    await sendOtpViaRenflair(phoneNo, otp);
 
     return res.status(201).json({
-      message: "User created successfully",
-      token: jwtToken, 
-      user: {
-        id: newUser._id,
-        fullname: newUser.fullname,
-        gmail: newUser.gmail,
-        panCard: newUser.panCard,
-        aadhaarNo: newUser.aadhaarNo,
-        consumerNumber: newUser.consumerNumber,
-        address: newUser.address,
-        phoneNo: newUser.phoneNo,
-        email: newUser.email,
-        aadhaarfrontUrl: newUser.aadhaarfrontDocument!.url,
-        aadhaarbackUrl: newUser.aadhaarbackDocument!.url,
-        panCardUrl: newUser.panCardDocument!.url,
-        electricityUrl: newUser.electricityDocument!.url,
-      },
+      message: "OTP sent to mobile. Verify to activate account.",
+      userId: user._id,
     });
-  } catch (error) {
-    if ((error as any)?.issues) {
-      console.log("Signup validation error:", error);
-      return res.status(400).json({
-        message: "Validation failed",
-        errors: (error as any).issues,
-      });
-    }
-
-    console.log("Signup error:", error);
-    return res.status(500).json({ message: "Error signing up" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Signup failed" });
   }
 };
-
 
 export const login = async (req: Request, res: Response): Promise<any> => {
   try {
@@ -157,7 +126,7 @@ export const login = async (req: Request, res: Response): Promise<any> => {
     // 📩 Send SMS via Renflair
     const res1 = await sendOtpViaRenflair(user.phoneNo, otp);
     console.log("Wait", user.phoneNo, otp);
-    console.log("renflaire",res1);
+    console.log("renflaire", res1);
 
     return res.status(200).json({
       message: "OTP sent successfully",
@@ -168,7 +137,6 @@ export const login = async (req: Request, res: Response): Promise<any> => {
     return res.status(500).json({ message: "Failed to send OTP" });
   }
 };
-
 
 export const logout = async (req: Request, res: Response): Promise<any> => {
   res.clearCookie("token", {
@@ -244,7 +212,6 @@ export const getMyProfile = async (
     });
   }
 };
-
 
 export const updateMyProfile = async (
   req: Request,
@@ -368,7 +335,6 @@ export const updateMyProfile = async (
   }
 };
 
-
 export const verifyLoginOtp = async (
   req: Request,
   res: Response,
@@ -419,6 +385,56 @@ export const verifyLoginOtp = async (
     });
   } catch (error) {
     console.error(error);
+    return res.status(500).json({ message: "OTP verification failed" });
+  }
+};
+
+export const verifySignupOtp = async (
+  req: Request,
+  res: Response,
+): Promise<any> => {
+  try {
+    const { id, otp, role } = req.body; // role: "user" | "vendor"
+
+    const account = role === "vendor" ? await Vendor.findById(id) : await User.findById(id);
+
+    if (!account || !account.signupOtp) {
+      return res.status(400).json({ message: "Invalid request" });
+    }
+
+    if (account.signupOtpExpiresAt! < new Date()) {
+      return res.status(400).json({ message: "OTP expired" });
+    }
+
+    const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
+
+    if (hashedOtp !== account.signupOtp) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+
+    // Activate account
+    account.isPhoneVerified = true;
+    account.signupOtp = undefined;
+    account.signupOtpExpiresAt = undefined;
+    await account.save();
+
+    // Issue JWT
+    const token = jwt.sign({ id: account._id }, config.JWT_PASSWORD, {
+      expiresIn: "7d",
+    });
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return res.status(200).json({
+      message: "Account verified successfully",
+      token,
+    });
+  } catch (err) {
     return res.status(500).json({ message: "OTP verification failed" });
   }
 };

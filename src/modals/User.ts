@@ -42,6 +42,16 @@ const userSchema = new mongoose.Schema(
     loginOtpExpiresAt: {
       type: Date,
     },
+    isPhoneVerified: {
+      type: Boolean,
+      default: false,
+    },
+    signupOtp: {
+      type: String,
+    },
+    signupOtpExpiresAt: {
+      type: Date,
+    },
   },
   { timestamps: true },
 );
