@@ -315,7 +315,7 @@ export const updateMyProfile = async (
       message: "Profile updated successfully",
       user: {
         id: user._id,
-        fullname: user.fullname,
+        fullname: user.fullName,
         address: user.address,
         gmail: user.gmail,
         phoneNo: user.phoneNo,
@@ -379,7 +379,7 @@ export const verifyLoginOtp = async (
       token,
       user: {
         id: user._id,
-        username: user.fullname,
+        username: user.fullName,
         email: user.email,
       },
     });
@@ -433,6 +433,11 @@ export const verifySignupOtp = async (
     return res.status(200).json({
       message: "Account verified successfully",
       token,
+      account: {
+        id: account._id,
+        username: account.fullName,
+        email: account.email,
+      },
     });
   } catch (err) {
     return res.status(500).json({ message: "OTP verification failed" });

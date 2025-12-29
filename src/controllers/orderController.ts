@@ -237,7 +237,7 @@ export const placeOrder = async (req: AuthRequest, res: Response) => {
     }
 
     // SEND ORDER PLACED SMS (WITH CUSTOMER NAME)
-    await sendOrderPlacedSms(user.phoneNo, user.fullname, order.orderId);
+    await sendOrderPlacedSms(user.phoneNo, user.fullName, order.orderId);
 
     return res.status(201).json({
       message: "Order placed successfully",

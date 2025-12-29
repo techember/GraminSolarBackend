@@ -8,7 +8,7 @@ export const initCronJobs = () => {
 
   cronInitialized = true;
 
-  cron.schedule("*/10 * * * *", async () => {
+  cron.schedule("0 * * * *", async () => {
     try {
       console.log("Running order processing cron");
       await processOrderEmails();

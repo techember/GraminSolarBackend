@@ -18,9 +18,9 @@ userRouter.post(
   "/signup",
   upload.fields([
     { name: "aadharfrontDoc", maxCount: 1 },
-    {name: "aadharbackDoc", maxCount: 1 },
+    { name: "aadharbackDoc", maxCount: 1 },
     { name: "panDoc", maxCount: 1 },
-    { name: "electricityBillDoc", maxCount: 1 }, 
+    { name: "electricityBillDoc", maxCount: 1 },
   ]),
   signup,
 );
@@ -36,11 +36,11 @@ userRouter.put(
   "/me",
   protect,
   upload.fields([
-  { name: "aadharfrontDoc", maxCount: 1 },
-  { name: "aadharbackDoc", maxCount: 1 },
-  { name: "panDoc", maxCount: 1 },
-  { name: "electricityBillDoc", maxCount: 1 },
-]),
+    { name: "aadharfrontDoc", maxCount: 1 },
+    { name: "aadharbackDoc", maxCount: 1 },
+    { name: "panDoc", maxCount: 1 },
+    { name: "electricityBillDoc", maxCount: 1 },
+  ]),
   updateMyProfile,
 );
 
