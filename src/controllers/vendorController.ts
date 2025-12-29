@@ -12,6 +12,7 @@ export const signup = async (
   req: Request,
   res: Response,
 ): Promise<any> => {
+  console.log(req.body);
   try {
     const { fullName, address, aadhaarNo, panCard, email, password, phoneNo } =
       req.body;
