@@ -13,6 +13,7 @@ import { sendOtpViaRenflair } from "../utils/renflairsms";
 import { Vendor } from "../modals/Vendor";
 
 export const signup = async (req: Request, res: Response): Promise<any> => {
+  console.log(req.body);
   try {
     const {
       fullname,
