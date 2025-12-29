@@ -399,6 +399,8 @@ export const verifySignupOtp = async (
 
     const account = role === "vendor" ? await Vendor.findById(id) : await User.findById(id);
 
+    console.log(account);
+
     if (!account || !account.signupOtp) {
       return res.status(400).json({ message: "Invalid request" });
     }
