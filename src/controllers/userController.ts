@@ -437,7 +437,7 @@ export const verifySignupOtp = async (
     return res.status(200).json({
       message: "Account verified successfully",
       token,
-      account: {
+      user: {
         id: account._id,
         username: account.fullName,
         email: account.email,
