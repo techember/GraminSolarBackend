@@ -4,6 +4,7 @@ import {
   logout,
   login,
   getVendorWithUsers,
+  verifySignupOtp,
 } from "../controllers/vendorController";
 import { upload } from "../middlewares/upload";
 
@@ -23,5 +24,6 @@ vendorRouter.post(
 vendorRouter.post("/login", login);
 vendorRouter.post("/logout", logout);
 vendorRouter.get("/getVendorWithUsers/:vendorId", getVendorWithUsers);
+vendorRouter.post("/verify-signup-otp", verifySignupOtp);
 
 export default vendorRouter;

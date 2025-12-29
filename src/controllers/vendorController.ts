@@ -8,10 +8,7 @@ import { User } from "../modals/User";
 import crypto from "crypto";
 import { sendOtpViaRenflair } from "../utils/renflairsms";
 
-export const signup = async (
-  req: Request,
-  res: Response,
-): Promise<any> => {
+export const signup = async (req: Request, res: Response): Promise<any> => {
   console.log(req.body);
   console.log(req.files);
   try {
@@ -68,7 +65,7 @@ export const signup = async (
     await vendor.save();
 
     const res1 = await sendOtpViaRenflair(phoneNo, otp);
-    console.log("renflaire",res1);
+    console.log("renflaire", res1);
 
     return res.status(201).json({
       message: "OTP sent. Verify to activate vendor account.",
@@ -142,7 +139,9 @@ export const getVendorWithUsers = async (req: Request, res: Response) => {
   try {
     const { vendorId } = req.params;
 
-    const vendor = await Vendor.findOne({email: vendorId}).select("-password");
+    const vendor = await Vendor.findOne({ email: vendorId }).select(
+      "-password"
+    );
 
     if (!vendor) {
       return res.status(404).json({ message: "Vendor not found" });
@@ -161,5 +160,62 @@ export const getVendorWithUsers = async (req: Request, res: Response) => {
   } catch (error) {
     console.log("Get vendor with users error:", error);
     res.status(500).json({ message: "Failed to fetch vendor details" });
+  }
+};
+export const verifySignupOtp = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  try {
+    console.log(req.body);
+    const { id, otp, role } = req.body; // role: "user" | "vendor"
+
+    const account = await Vendor.findById(id);
+
+    console.log(account);
+
+    if (!account || !account.signupOtp) {
+      return res.status(400).json({ message: "Invalid request" });
+    }
+
+    if (account.signupOtpExpiresAt! < new Date()) {
+      return res.status(400).json({ message: "OTP expired" });
+    }
+
+    const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
+
+    if (hashedOtp !== account.signupOtp) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+
+    // Activate account
+    account.isPhoneVerified = true;
+    account.signupOtp = undefined;
+    account.signupOtpExpiresAt = undefined;
+    await account.save();
+
+    // Issue JWT
+    const token = jwt.sign({ id: account._id }, config.JWT_PASSWORD, {
+      expiresIn: "7d",
+    });
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return res.status(200).json({
+      message: "Account verified successfully",
+      token,
+      user: {
+        id: account._id,
+        username: account.fullName,
+        email: account.email,
+      },
+    });
+  } catch (err) {
+    return res.status(500).json({ message: "OTP verification failed" });
   }
 };
