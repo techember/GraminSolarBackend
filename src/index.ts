@@ -7,6 +7,7 @@ import cors from "cors";
 import adminRouter from "./routes/adminRoutes";
 import vendorRouter from "./routes/vendorRouter";
 import orderRouter from "./routes/orderRoutes";
+import { initCronJobs } from "./utils/cron";
 
 mongoose
   .connect(config.MONGO_URL)
@@ -14,9 +15,9 @@ mongoose
   .catch((err) => console.log("MongoDB connection error:", err));
 
 const app = express();
+
 app.use(cookieParser());
 
-// CORS setup for localhost:5173
 app.use(
   cors({
     origin: [
@@ -25,7 +26,7 @@ app.use(
       "http://localhost:3000",
     ],
     credentials: true,
-  })
+  }),
 );
 
 app.use(express.json());
@@ -36,7 +37,12 @@ app.use("/api/adminAuth", adminRouter);
 app.use("/api/vendorAuth", vendorRouter);
 app.use("/api/orders", orderRouter);
 
-// Start server
-app.listen(config.port, () => {
-  console.log(`Server running on port ${config.port}`);
+// START CRON ONCE
+initCronJobs();
+
+//PORT MUST COME FROM ENV (Render requirement)
+const PORT = process.env.PORT || config.port || 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });

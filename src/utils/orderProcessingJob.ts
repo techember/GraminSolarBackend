@@ -7,7 +7,7 @@ export const processOrderEmails = async () => {
   const orders = await Order.find({
     createdAt: { $lte: cutoff },
     processingMailSent: false,
-  }).populate("user");
+  }).limit(50).populate("user");
 
   for (const order of orders) {
     const user = order.user as any;
