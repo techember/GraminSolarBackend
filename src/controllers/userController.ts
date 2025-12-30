@@ -105,7 +105,8 @@ export const login = async (req: Request, res: Response): Promise<any> => {
   try {
     const { email, password } = await loginSchema.parseAsync(req.body);
 
-    const user = await Vendor.findOne({ email });
+    const user = await User.findOne({ email });
+    console.log(user);
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
@@ -133,7 +134,6 @@ export const login = async (req: Request, res: Response): Promise<any> => {
         id: user._id,
         fullName: user.fullName,
         email: user.email,
-        status: user.status,
       },
     });
   } catch (error) {
@@ -212,11 +212,10 @@ export const getUserById = async (
       return res.status(400).json({ message: "Invalid user id" });
     }
 
- 
     const user = await User.findById(id).select("-password").lean();
     console.log(user);
 
-      if (!user) {
+    if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
     return res.status(200).json({ user });
@@ -227,7 +226,7 @@ export const getUserById = async (
 };
 export const updateMyProfile = async (
   req: Request,
-  res: Response,
+  res: Response
 ): Promise<any> => {
   try {
     const userId = (req as any).userId;
@@ -269,7 +268,7 @@ export const updateMyProfile = async (
 
     // NORMAL FIELD UPDATES
     const editableFields = [
-      "fullname",
+      "fullName",
       "address",
       "gmail",
       "phoneNo",
@@ -321,13 +320,15 @@ export const updateMyProfile = async (
       };
     }
 
+    console.log("REQ BODY:", req.body);
+
     await user.save();
 
     return res.status(200).json({
       message: "Profile updated successfully",
       user: {
         id: user._id,
-        fullname: user.fullName,
+        fullName: user.fullName,
         address: user.address,
         gmail: user.gmail,
         phoneNo: user.phoneNo,
@@ -349,7 +350,7 @@ export const updateMyProfile = async (
 
 export const verifySignupOtp = async (
   req: Request,
-  res: Response,
+  res: Response
 ): Promise<any> => {
   try {
     console.log(req.body);
