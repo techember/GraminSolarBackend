@@ -202,28 +202,29 @@ export const contact = async (req: Request, res: Response): Promise<any> => {
 
 export const getUserById = async (
   req: Request,
-  res: Response,
+  res: Response
 ): Promise<any> => {
   try {
     const { id } = req.params;
+    console.log(id);
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "Invalid user id" });
     }
 
+ 
     const user = await User.findById(id).select("-password").lean();
+    console.log(user);
 
-    if (!user) {
+      if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-
     return res.status(200).json({ user });
   } catch (error) {
     console.error("Get user by id error:", error);
     return res.status(500).json({ message: "Server error" });
   }
 };
-
 export const updateMyProfile = async (
   req: Request,
   res: Response,
