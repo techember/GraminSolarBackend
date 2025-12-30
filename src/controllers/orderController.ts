@@ -44,7 +44,7 @@ export const createOrder = async (req: Request, res: Response) => {
 
     // SEND EMAIL
     if (user.email && user.fullName && order.orderId) {
-      sendOrderPlacedEmail(user.email, user.fullName, order.orderId).catch(
+       await sendOrderPlacedEmail(user.email, user.fullName, order.orderId).catch(
         (err) => console.error("Email failed (ignored):", err.message),
       );
     }

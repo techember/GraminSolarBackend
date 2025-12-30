@@ -1,21 +1,29 @@
 import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
+  service: "gmail",
   auth: {
     user: process.env.MAIL_USER,
     pass: process.env.MAIL_PASS,
   },
 });
 
+transporter.verify((error, success) => {
+  if (error) {
+    console.error("SMTP connection failed:", error);
+  } else {
+    console.log("SMTP server is ready to send emails");
+  }
+});
+
+
 export const sendOrderPlacedEmail = async (
   email: string,
   customerName: string,
   orderId: string,
 ) => {
-  const textBody = `Dear ${customerName},
+  try {
+      const textBody = `Dear ${customerName},
 
 Thank you for choosing Deeksha Gramin Solar.
 
@@ -40,6 +48,12 @@ Team Deeksha Gramin Solar`;
     text: textBody,
   });
   console.log("Order placed email sent to:", email);
+
+  } catch (error: any) {
+    console.error("Email send failed:", error.message);
+    throw error; 
+  }
+
 };
 
 export const sendOrderProcessingEmail = async (
