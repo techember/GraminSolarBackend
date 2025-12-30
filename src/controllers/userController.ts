@@ -206,6 +206,7 @@ export const getUserById = async (
 ): Promise<any> => {
   try {
     const { id } = req.params;
+    console.log(id);
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "Invalid user id" });
@@ -213,6 +214,7 @@ export const getUserById = async (
 
  
     const user = await User.findById(id).select("-password").lean();
+    console.log(user);
 
       if (!user) {
       return res.status(404).json({ message: "User not found" });
