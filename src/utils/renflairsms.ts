@@ -62,31 +62,25 @@ export const sendOrderPlacedSms = async (
   try {
     const API_KEY = process.env.RENFLAIR_API_KEY;
 
-    const url = "https://sms.renflair.in/V3.php";
+    const message = `Hi ${customerName}, Your order ID ${orderId} has been placed successfully. It will be delivered soon.`;
 
-    const params = {
-      API: API_KEY,
-      PHONE: phone,
-      // 🔴 MUST be encoded (DLT strict)
-      CNAME: encodeURIComponent(customerName),
-      OID: encodeURIComponent(orderId),
-    };
+    const url = "https://sms.renflair.in/V1.php";
 
     const response = await axios.get(url, {
-      params,
-      timeout: 15000,
+      params: {
+        API: API_KEY,
+        PHONE: phone,
+        MESSAGE: message,
+      },
+      timeout: 8000,
     });
 
-    console.log("✅ Renflair V3 SMS response:", response.data);
-
-    // 🔴 Explicit failure handling
-    if (response.data?.status !== "SUCCESS") {
-      console.error("❌ Renflair rejected SMS:", response.data);
-    }
-
+    console.log(" Renflair V1 MESSAGE response:", response.data);
     return response.data;
   } catch (err: any) {
-    console.error("❌ Renflair V3 error:", err.message || err);
-    return null; // NEVER crash order flow
+    console.error(" Renflair V1 MESSAGE failed:", err.code || err.message);
+    return null; // NEVER break order
   }
 };
+
+

@@ -12,9 +12,7 @@ export const protect = (
   next: NextFunction
 ): any => {
   try {
-    console.log("PROTECT MIDDLEWARE HIT");
     const authHeader = req.headers.authorization;
-    console.log("AUTH HEADER RECEIVED:", authHeader);
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({ message: "Not authorized" });
