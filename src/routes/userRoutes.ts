@@ -4,9 +4,9 @@ import {
   logout,
   login,
   contact,
-  getMyProfile,
   updateMyProfile,
   verifySignupOtp,
+  getUserById,
 } from "../controllers/userController";
 import { upload } from "../middlewares/upload";
 import { protect } from "../middlewares/Middlewares";
@@ -28,7 +28,7 @@ userRouter.post("/verify-signup-otp", verifySignupOtp);
 
 userRouter.post("/logout", logout);
 userRouter.post("/contact", contact);
-userRouter.get("/me", protect, getMyProfile);
+userRouter.get("/me/:id", getUserById);
 
 userRouter.put(
   "/me",
