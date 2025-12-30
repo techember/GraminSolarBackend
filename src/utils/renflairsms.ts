@@ -34,23 +34,46 @@ export const sendOtpViaRenflair = async (phone: string, otp: string) => {
 
 export const sendOrderPlacedSms = async (
   phone: string,
-  _customerName: string,
+  customerName: string,
   orderId: string,
 ) => {
   try {
     const API_KEY = process.env.RENFLAIR_API_KEY;
-    const otp = orderId.slice(-4);
 
-    const url = `https://sms.renflair.in/V1.php?API=${API_KEY}&PHONE=${phone}&OTP=${otp}`;
+    if (!API_KEY) {
+      console.warn("RENFLAIR_API_KEY missing");
+      return null;
+    }
 
-    const response = await axios.get(url, { timeout: 8000 });
+    // const invoiceLink = `https://yourdomain.com/invoice/${orderId}.png`;
+
+    const message = `Hi ${customerName},
+Your order ID ${orderId} has been placed successfully ✅
+Thank you for shopping with us.`;
+
+    const url = "https://sms.renflair.in/V3.php";
+
+    const params = {
+      API: API_KEY,
+      mobile: phone,
+      message,
+      senderid: "RENFLR",          // ⬅ your approved sender ID
+      route: "trans", // ⬅ DLT template ID (important)
+    };
+
+    const response = await axios.get(url, {
+      params,
+      timeout: 8000,
+    });
 
     console.log("Renflair SMS:", response.data);
     return response.data;
-  } catch (err) {
-    //@ts-ignore
-    console.error(" Renflair SMS failed (ignored):", err.code || err.message);
-    return null; // ⬅NEVER THROW
+  } catch (err: any) {
+    console.error(
+      "Renflair SMS failed (ignored):",
+      err?.code || err?.message
+    );
+    return null; // ⬅ NEVER THROW (as you wanted)
   }
 };
 
