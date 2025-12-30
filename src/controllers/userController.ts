@@ -203,6 +203,7 @@ export const contact = async (req: Request, res: Response): Promise<any> => {
 export const getMyProfile = async (req: Request, res: Response) => {
   try {
     const userId = new mongoose.Types.ObjectId((req as any).userId);
+    console.log(userId);
 
     const user = await User.findById(userId).lean();
     console.log("Fetched user:", user);
