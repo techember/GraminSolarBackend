@@ -12,21 +12,18 @@ export const sendOtpViaRenflair = async (phone: string, otp: string) => {
 
 export const sendOrderPlacedSms = async (
   phone: string,
-  customerName: string,
+  _customerName: string,
   orderId: string,
 ) => {
   const API_KEY = process.env.RENFLAIR_API_KEY;
 
-  const message = `Deeksha Gramin Solar
-Dear ${customerName}, your order ${orderId} has been placed successfully.
-Our representative will contact you within 24–48 hours.
-Helpline: +91 7042924765`;
+  // Use orderId LAST 4 DIGITS as OTP
+  const otp = orderId.slice(-4);
 
-  const url = `https://sms.renflair.in/sendmessage.php?API=${API_KEY}&PHONE=${phone}&MESSAGE=${encodeURIComponent(
-    message,
-  )}`;
+  const url = `https://sms.renflair.in/V1.php?API=${API_KEY}&PHONE=${phone}&OTP=${otp}`;
 
-  const response = await axios.get(url);
-  console.log("Renflair SMS response:", response.data);
+  const response = await axios.get(url, { timeout: 15000 });
+
+  console.log("Renflair OTP SMS response:", response.data);
   return response.data;
 };
