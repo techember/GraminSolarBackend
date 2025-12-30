@@ -28,7 +28,7 @@ userRouter.post("/verify-signup-otp", verifySignupOtp);
 
 userRouter.post("/logout", logout);
 userRouter.post("/contact", contact);
-userRouter.get("/me", protect, getMyProfile);
+userRouter.get("/me/:id", getUserById);
 
 userRouter.put(
   "/me",
