@@ -30,24 +30,52 @@ export const sendOtpViaRenflair = async (phone: string, otp: string) => {
 //   console.log("Renflair SMS response:", response.data);
 //   return response.data;
 // };
+
+
+// export const sendOrderPlacedSms = async (
+//   phone: string,
+//   _customerName: string,
+//   orderId: string,
+// ) => {
+//   try {
+//     const API_KEY = process.env.RENFLAIR_API_KEY;
+//     const otp = orderId.slice(-4);
+
+//     const url = `https://sms.renflair.in/V1.php?API=${API_KEY}&PHONE=${phone}&OTP=${otp}`;
+
+//     const response = await axios.get(url, { timeout: 8000 });
+
+//     console.log("Renflair SMS:", response.data);
+//     return response.data;
+//   } catch (err) {
+//     //@ts-ignore
+//     console.error(" Renflair SMS failed (ignored):", err.code || err.message);
+//     return null; // ⬅NEVER THROW
+//   }
+// };
+
+
 export const sendOrderPlacedSms = async (
   phone: string,
-  _customerName: string,
+  customerName: string,
   orderId: string,
 ) => {
-  try {
-    const API_KEY = process.env.RENFLAIR_API_KEY;
-    const otp = orderId.slice(-4);
+  const API_KEY = process.env.RENFLAIR_API_KEY;
 
-    const url = `https://sms.renflair.in/V1.php?API=${API_KEY}&PHONE=${phone}&OTP=${otp}`;
+  const url = "https://sms.renflair.in/V3.php";
 
-    const response = await axios.get(url, { timeout: 8000 });
+  const params = {
+    API: API_KEY,
+    PHONE: phone,
+    CNAME: customerName,
+    OID: orderId,
+  };
 
-    console.log("Renflair SMS:", response.data);
-    return response.data;
-  } catch (err) {
-    //@ts-ignore
-    console.error(" Renflair SMS failed (ignored):", err.code || err.message);
-    return null; // ⬅NEVER THROW
-  }
+  const response = await axios.get(url, {
+    params,
+    timeout: 15000,
+  });
+
+  console.log("Renflair V3 SMS response:", response.data);
+  return response.data;
 };
