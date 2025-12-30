@@ -54,28 +54,39 @@ export const sendOtpViaRenflair = async (phone: string, otp: string) => {
 //   }
 // };
 
-
 export const sendOrderPlacedSms = async (
   phone: string,
   customerName: string,
   orderId: string,
 ) => {
-  const API_KEY = process.env.RENFLAIR_API_KEY;
+  try {
+    const API_KEY = process.env.RENFLAIR_API_KEY;
 
-  const url = "https://sms.renflair.in/V3.php";
+    const url = "https://sms.renflair.in/V3.php";
 
-  const params = {
-    API: API_KEY,
-    PHONE: phone,
-    CNAME: customerName,
-    OID: orderId,
-  };
+    const params = {
+      API: API_KEY,
+      PHONE: phone,
+      // 🔴 MUST be encoded (DLT strict)
+      CNAME: encodeURIComponent(customerName),
+      OID: encodeURIComponent(orderId),
+    };
 
-  const response = await axios.get(url, {
-    params,
-    timeout: 15000,
-  });
+    const response = await axios.get(url, {
+      params,
+      timeout: 15000,
+    });
 
-  console.log("Renflair V3 SMS response:", response.data);
-  return response.data;
+    console.log("✅ Renflair V3 SMS response:", response.data);
+
+    // 🔴 Explicit failure handling
+    if (response.data?.status !== "SUCCESS") {
+      console.error("❌ Renflair rejected SMS:", response.data);
+    }
+
+    return response.data;
+  } catch (err: any) {
+    console.error("❌ Renflair V3 error:", err.message || err);
+    return null; // NEVER crash order flow
+  }
 };
