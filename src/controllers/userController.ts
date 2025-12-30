@@ -87,9 +87,8 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
       },
     });
 
-    await user.save();
-
     await sendOtpViaRenflair(phoneNo, otp);
+    await user.save();
 
     return res.status(201).json({
       message: "OTP sent to mobile. Verify to activate account.",
