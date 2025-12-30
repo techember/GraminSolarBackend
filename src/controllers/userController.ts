@@ -13,9 +13,10 @@ import { sendOtpViaRenflair } from "../utils/renflairsms";
 import { Vendor } from "../modals/Vendor";
 
 export const signup = async (req: Request, res: Response): Promise<any> => {
+  console.log(req.body);
   try {
     const {
-      fullname,
+      fullName,
       VendorReference,
       phoneNo,
       address,
@@ -54,7 +55,7 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
     const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
 
     const user = new User({
-      fullname,
+      fullName,
       gmail: VendorReference || "",
       phoneNo,
       address,
@@ -394,9 +395,12 @@ export const verifySignupOtp = async (
   res: Response,
 ): Promise<any> => {
   try {
+    console.log(req.body);
     const { id, otp, role } = req.body; // role: "user" | "vendor"
 
-    const account = role === "vendor" ? await Vendor.findById(id) : await User.findById(id);
+    const account = await User.findById(id);
+
+    console.log(account);
 
     if (!account || !account.signupOtp) {
       return res.status(400).json({ message: "Invalid request" });
@@ -433,7 +437,7 @@ export const verifySignupOtp = async (
     return res.status(200).json({
       message: "Account verified successfully",
       token,
-      account: {
+      user: {
         id: account._id,
         username: account.fullName,
         email: account.email,
