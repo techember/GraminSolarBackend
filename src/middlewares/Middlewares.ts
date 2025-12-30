@@ -14,6 +14,7 @@ export const protect = (
   try {
     console.log("PROTECT MIDDLEWARE HIT");
     const authHeader = req.headers.authorization;
+    console.log("AUTH HEADER RECEIVED:", authHeader);
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({ message: "Not authorized" });
@@ -22,6 +23,7 @@ export const protect = (
     const token = authHeader.split(" ")[1];
 
     const decoded = jwt.verify(token, config.JWT_PASSWORD) as JwtPayload;
+    
 
     // ✅ Attach ONLY userId
     (req as any).userId = decoded.id;
