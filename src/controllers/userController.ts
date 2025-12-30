@@ -200,31 +200,21 @@ export const contact = async (req: Request, res: Response): Promise<any> => {
   }
 };
 
-export const getMyProfile = async (
-  req: Request,
-  res: Response,
-): Promise<any> => {
+export const getMyProfile = async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).userId;
-    console.log(userId);
+    const userId = new mongoose.Types.ObjectId((req as any).userId);
 
-    const user = await User.findById(
-      new mongoose.Types.ObjectId((req as any).userId),
-    ).select("-password");
-
+    const user = await User.findById(userId).lean();
+    console.log("Fetched user:", user);
 
     if (!user) {
-      return res.status(404).json({
-        message: "User not found",
-      });
+      return res.status(404).json({ message: "User not found" });
     }
 
     return res.status(200).json({ user });
-  } catch (error) {
-    console.error("Get profile error:", error);
-    return res.status(500).json({
-      message: "Server error",
-    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Server error" });
   }
 };
 
