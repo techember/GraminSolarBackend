@@ -7,7 +7,6 @@ import {
   verifySignupOtp,
 } from "../controllers/vendorController";
 import { upload } from "../middlewares/upload";
-import { verifySignupOtp } from "../controllers/userController";
 
 const vendorRouter = Router();
 

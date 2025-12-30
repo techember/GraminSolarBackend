@@ -102,9 +102,9 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
 
 export const login = async (req: Request, res: Response): Promise<any> => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = await loginSchema.parseAsync(req.body);
 
-    const user = await User.findOne({ email });
+    const user = await Vendor.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
@@ -114,28 +114,37 @@ export const login = async (req: Request, res: Response): Promise<any> => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // 🔐 Generate 6-digit OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const jwtToken = jwt.sign({ id: user._id }, config.JWT_PASSWORD, {
+      expiresIn: "7d",
+    });
 
-    // 🔒 Hash OTP before storing
-    const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
+    res.cookie("token", jwtToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
 
-    user.loginOtp = hashedOtp;
-    user.loginOtpExpiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 mins
-    await user.save();
-
-    // 📩 Send SMS via Renflair
-    const res1 = await sendOtpViaRenflair(user.phoneNo, otp);
-    console.log("Wait", user.phoneNo, otp);
-    console.log("renflaire", res1);
-
-    return res.status(200).json({
-      message: "OTP sent successfully",
-      userId: user._id,
+    return res.json({
+      message: "Login successful",
+      token: jwtToken,
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        status: user.status, // useful on frontend
+      },
     });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Failed to send OTP" });
+    if ((error as any)?.issues) {
+      return res.status(400).json({
+        message: "Validation failed",
+        errors: (error as any).issues,
+      });
+    }
+
+    console.log("Login error:", error);
+    return res.status(500).json({ message: "Error logging in" });
   }
 };
 
