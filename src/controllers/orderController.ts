@@ -39,12 +39,14 @@ export const createOrder = async (req: Request, res: Response) => {
 
     // SEND SMS
     if (user.phoneNo && user.fullName && order.orderId) {
-      await sendOrderPlacedSms(user.phoneNo, user.fullName, order.orderId);
+      sendOrderPlacedSms(user.phoneNo, user.fullName, order.orderId);
     }
 
     // SEND EMAIL
     if (user.email && user.fullName && order.orderId) {
-      await sendOrderPlacedEmail(user.email, user.fullName, order.orderId);
+      sendOrderPlacedEmail(user.email, user.fullName, order.orderId).catch(
+        (err) => console.error("Email failed (ignored):", err.message),
+      );
     }
 
     return res.status(201).json({
