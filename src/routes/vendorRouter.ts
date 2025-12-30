@@ -6,6 +6,7 @@ import {
   getVendorWithUsers,
 } from "../controllers/vendorController";
 import { upload } from "../middlewares/upload";
+import { verifySignupOtp } from "../controllers/userController";
 
 const vendorRouter = Router();
 
@@ -20,6 +21,7 @@ vendorRouter.post(
   ]),
   signup
 );
+vendorRouter.post("/verify-signup-otp", verifySignupOtp);
 vendorRouter.post("/login", login);
 vendorRouter.post("/logout", logout);
 vendorRouter.get("/getVendorWithUsers/:vendorId", getVendorWithUsers);
