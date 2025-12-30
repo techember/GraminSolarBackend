@@ -12,6 +12,7 @@ export const protect = (
   next: NextFunction
 ): any => {
   try {
+    console.log("PROTECT MIDDLEWARE HIT");
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
