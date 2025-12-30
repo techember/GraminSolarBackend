@@ -20,7 +20,7 @@ export const processOrderEmails = async () => {
           order.orderId,
         );
 ;
-
+    console.log("Sending processing email for order:", order.orderId);
     order.processingMailSent = true;
     await order.save();
   }

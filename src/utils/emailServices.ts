@@ -31,12 +31,15 @@ We look forward to serving you with reliable and sustainable solar solutions.
 Warm regards,
 Team Deeksha Gramin Solar`;
 
+  console.log("Sending order placed email to:", email);
+
   await transporter.sendMail({
     from: `"Deeksha Gramin Solar" <${process.env.MAIL_USER}>`,
     to: email,
     subject: `Order Placed Successfully - ${orderId}`,
     text: textBody,
   });
+  console.log("Order placed email sent to:", email);
 };
 
 export const sendOrderProcessingEmail = async (

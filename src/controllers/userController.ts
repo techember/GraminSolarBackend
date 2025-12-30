@@ -132,7 +132,7 @@ export const login = async (req: Request, res: Response): Promise<any> => {
         id: user._id,
         fullName: user.fullName,
         email: user.email,
-        status: user.status, // useful on frontend
+        status: user.status,
       },
     });
   } catch (error) {
@@ -342,60 +342,6 @@ export const updateMyProfile = async (
   } catch (error) {
     console.error("Update profile error:", error);
     return res.status(500).json({ message: "Server error" });
-  }
-};
-
-export const verifyLoginOtp = async (
-  req: Request,
-  res: Response,
-): Promise<any> => {
-  try {
-    const { userId, otp } = req.body;
-
-    const user = await User.findById(userId);
-    if (!user || !user.loginOtp) {
-      return res.status(400).json({ message: "Invalid request" });
-    }
-
-    if (user.loginOtpExpiresAt! < new Date()) {
-      return res.status(400).json({ message: "OTP expired" });
-    }
-
-    const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
-
-    if (hashedOtp !== user.loginOtp) {
-      return res.status(400).json({ message: "Invalid OTP" });
-    }
-
-    // OTP verified → cleanup
-    user.loginOtp = undefined;
-    user.loginOtpExpiresAt = undefined;
-    await user.save();
-
-    // Issue JWT
-    const token = jwt.sign({ id: user._id }, config.JWT_PASSWORD, {
-      expiresIn: "7d",
-    });
-
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
-    return res.status(200).json({
-      message: "Login successful",
-      token,
-      user: {
-        id: user._id,
-        username: user.fullName,
-        email: user.email,
-      },
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "OTP verification failed" });
   }
 };
 

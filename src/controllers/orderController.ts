@@ -1,18 +1,18 @@
 import { Request, Response } from "express";
 import Order from "../modals/Order";
-import { User } from '../modals/User';
+import { User } from "../modals/User";
 import { sendOrderPlacedSms } from "../utils/renflairsms";
-
-interface AuthRequest extends Request {
-  user?: {
-    id: string;
-  };
-}
+import { sendOrderPlacedEmail } from "../utils/emailServices";
 
 export const createOrder = async (req: Request, res: Response) => {
-  console.log("Create Order called with body:", req.body);
   try {
     const userId = (req as any).userId;
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
     const { power, price, registrationFee, subsidy, location } = req.body;
 
     if (!req.file) {
@@ -21,33 +21,11 @@ export const createOrder = async (req: Request, res: Response) => {
       });
     }
 
-    // ✅ PARSE LOCATION
-    let parsedLocation;
-    try {
-      parsedLocation =
-        typeof location === "string" ? JSON.parse(location) : location;
-    } catch {
-      return res.status(400).json({
-        message: "Invalid location data",
-      });
-    }
-
-    // ✅ VALIDATION
-    if (
-      !power ||
-      !price ||
-      !registrationFee ||
-      !subsidy ||
-      !parsedLocation?.latitude ||
-      !parsedLocation?.longitude
-    ) {
-      return res.status(400).json({
-        message: "All fields are required",
-      });
-    }
+    const parsedLocation =
+      typeof location === "string" ? JSON.parse(location) : location;
 
     const order = await Order.create({
-      user: userId,
+      user: user._id,
       power,
       price: Number(price),
       registrationFee: Number(registrationFee),
@@ -57,16 +35,25 @@ export const createOrder = async (req: Request, res: Response) => {
         longitude: Number(parsedLocation.longitude),
       },
       paymentProof: req.file.path,
-      // isReferred → default false
     });
 
-    res.status(201).json({
+    // SEND SMS
+    if (user.phoneNo && user.fullName && order.orderId) {
+      await sendOrderPlacedSms(user.phoneNo, user.fullName, order.orderId);
+    }
+
+    // SEND EMAIL
+    if (user.email && user.fullName && order.orderId) {
+      await sendOrderPlacedEmail(user.email, user.fullName, order.orderId);
+    }
+
+    return res.status(201).json({
       message: "Order placed successfully",
       order,
     });
-  } catch (err) {
-    console.log("Order creation error:", err);
-    res.status(500).json({
+  } catch (error) {
+    console.error("Create order error:", error);
+    return res.status(500).json({
       message: "Internal server error",
     });
   }
@@ -211,7 +198,7 @@ export const getOrderByOrderId = async (req: Request, res: Response) => {
   }
 };
 
-export const placeOrder = async (req: AuthRequest, res: Response) => {
+export const placeOrder = async (req: Request, res: Response) => {
   try {
     if (!req.user?.id) {
       return res.status(401).json({ message: "Unauthorized" });
@@ -237,7 +224,9 @@ export const placeOrder = async (req: AuthRequest, res: Response) => {
     }
 
     // SEND ORDER PLACED SMS (WITH CUSTOMER NAME)
-    await sendOrderPlacedSms(user.phoneNo, user.fullName, order.orderId);
+    if (user.fullName && order.orderId) {
+      await sendOrderPlacedSms(user.phoneNo, user.fullName, order.orderId);
+    }
 
     return res.status(201).json({
       message: "Order placed successfully",

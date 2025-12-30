@@ -6,7 +6,6 @@ import {
   contact,
   getMyProfile,
   updateMyProfile,
-  verifyLoginOtp,
   verifySignupOtp,
 } from "../controllers/userController";
 import { upload } from "../middlewares/upload";
@@ -25,7 +24,6 @@ userRouter.post(
   signup,
 );
 userRouter.post("/login", login);
-userRouter.post("/verify-login-otp", verifyLoginOtp);
 userRouter.post("/verify-signup-otp", verifySignupOtp);
 
 userRouter.post("/logout", logout);

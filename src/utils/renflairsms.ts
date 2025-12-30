@@ -27,5 +27,6 @@ Helpline: +91 7042924765`;
   )}`;
 
   const response = await axios.get(url);
+  console.log("Renflair SMS response:", response.data);
   return response.data;
 };
