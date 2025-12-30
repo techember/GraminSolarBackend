@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import config from "../config";
+import mongoose from "mongoose";
 
 interface JwtPayload {
   id: string;
@@ -23,9 +24,7 @@ export const protect = (
     const decoded = jwt.verify(token, config.JWT_PASSWORD) as JwtPayload;
     
 
-    // ✅ Attach ONLY userId
-    (req as any).userId = decoded.id;
-
+(req as any).userId = new mongoose.Types.ObjectId(decoded.id);
     next();
   } catch (error) {
     return res.status(401).json({ message: "Invalid or expired token" });

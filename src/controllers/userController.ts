@@ -11,6 +11,7 @@ import {
 import crypto from "crypto";
 import { sendOtpViaRenflair } from "../utils/renflairsms";
 import { Vendor } from "../modals/Vendor";
+import mongoose from "mongoose";
 
 export const signup = async (req: Request, res: Response): Promise<any> => {
   console.log(req.body);
@@ -207,7 +208,10 @@ export const getMyProfile = async (
     const userId = (req as any).userId;
     console.log(userId);
 
-    const user = await User.findById(userId).select("-password");
+    const user = await User.findById(
+      new mongoose.Types.ObjectId((req as any).userId),
+    ).select("-password");
+
 
     if (!user) {
       return res.status(404).json({
