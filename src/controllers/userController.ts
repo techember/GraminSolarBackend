@@ -205,6 +205,7 @@ export const getMyProfile = async (
 ): Promise<any> => {
   try {
     const userId = (req as any).userId;
+    console.log(userId);
 
     const user = await User.findById(userId).select("-password");
 
