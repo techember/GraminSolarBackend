@@ -4,9 +4,10 @@ import {
   logout,
   login,
   contact,
-  getMyProfile,
+  //getMyProfile,
   updateMyProfile,
   verifySignupOtp,
+  getUserById,
 } from "../controllers/userController";
 import { upload } from "../middlewares/upload";
 import { protect } from "../middlewares/Middlewares";
