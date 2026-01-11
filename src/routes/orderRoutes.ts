@@ -5,7 +5,9 @@ import { upload } from "../middlewares/upload";
 
 const orderRouter = express.Router();
 
-orderRouter.post("/", upload.single("paymentProof"), protect, createOrder);
+orderRouter.post("/", 
+    // upload.single("paymentProof"),
+    protect, createOrder);
 orderRouter.get("/", protect, getAllOrders);
 orderRouter.put("/orders/:orderId", upload.single("paymentProof"), updateOrder);
 orderRouter.get("/orders/user/:userId", getOrdersByUser);

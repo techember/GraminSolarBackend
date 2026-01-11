@@ -25,15 +25,15 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
       aadharbackDoc?: Express.Multer.File[];
       panDoc?: Express.Multer.File[];
       BankDetailsDoc?: Express.Multer.File[];
-      paymentProof?: Express.Multer.File[];
+      // paymentProof?: Express.Multer.File[];
     };
 
     if (
       !files?.aadharfrontDoc?.[0] ||
       !files?.aadharbackDoc?.[0] ||
       !files?.panDoc?.[0] ||
-      !files?.BankDetailsDoc?.[0] ||
-      !files?.paymentProof?.[0]
+      !files?.BankDetailsDoc?.[0]
+      // !files?.paymentProof?.[0]
     ) {
       return res.status(400).json({ message: "All documents required" });
     }
@@ -59,7 +59,7 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
       aadharbackDoc: files.aadharbackDoc[0].path,
       panDoc: files.panDoc[0].path,
       bankDoc: files.BankDetailsDoc[0].path,
-      paymentProof: files.paymentProof[0].path,
+      // paymentProof: files.paymentProof[0].path,
     });
 
     await vendor.save();

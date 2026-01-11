@@ -14,12 +14,13 @@ export const createOrder = async (req: Request, res: Response) => {
     }
 
     const { power, price, registrationFee, subsidy, location } = req.body;
+    console.log(power);
 
-    if (!req.file) {
-      return res.status(400).json({
-        message: "Payment screenshot is required",
-      });
-    }
+    // if (!req.file) {
+    //   return res.status(400).json({
+    //     message: "Payment screenshot is required",
+    //   });
+    // }
 
     const parsedLocation =
       typeof location === "string" ? JSON.parse(location) : location;
@@ -34,7 +35,7 @@ export const createOrder = async (req: Request, res: Response) => {
         latitude: Number(parsedLocation.latitude),
         longitude: Number(parsedLocation.longitude),
       },
-      paymentProof: req.file.path,
+      // paymentProof: req.file.path,
     });
 
     // SEND SMS

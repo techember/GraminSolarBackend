@@ -52,7 +52,7 @@ const orderSchema = new mongoose.Schema(
 
     paymentProof: {
       type: String,
-      required: true,
+      // required: true,
     },
 
     status: {
