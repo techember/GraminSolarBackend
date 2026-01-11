@@ -17,7 +17,7 @@ vendorRouter.post(
     {name: "aadharbackDoc", maxCount: 1 },
     { name: "panDoc", maxCount: 1 },
     { name: "BankDetailsDoc", maxCount: 1 },
-    { name: "paymentProof", maxCount: 1 },
+    // { name: "paymentProof", maxCount: 1 },
   ]),
   signup
 );

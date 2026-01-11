@@ -48,7 +48,7 @@ const vendorSchema = new mongoose.Schema({
   },
   paymentProof: {
     type: String,
-    required: true,
+    // required: true,
   },
   status: {
     type: String,
